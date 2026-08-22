@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
+import { loadSources } from './sources.mjs';
 
 const REPORT_VERSION = '1.0.0';
 const indexPath = () => resolve('artifacts/hub/runs-v1.json');
@@ -47,19 +48,32 @@ function demoReport() {
 export async function buildDashboard() {
   const realReport = await loadReport();
   const report = realReport || demoReport();
+  const { sources, warnings: sourceWarnings } = await loadSources();
   const decisions = await readJson(decisionsPath(), {});
-  const openApprovals = report.approvals.filter((item) => decisions[item.id] !== 'approved');
-  const work = report.results.filter((item) => ['failed', 'warning'].includes(item.status)).sort((a, b) => priority(a.status) - priority(b.status));
+  const sourceApprovals = (sources.approvals?.items || []).map((item) => ({ ...item, provenance: sources.approvals.mode }));
+  const openApprovals = [...report.approvals.map((item) => ({ ...item, priority: 0, provenance: realReport ? 'live' : 'fixture' })), ...sourceApprovals].filter((item) => decisions[item.id] !== 'approved').sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+  const repairs = (sources.repairs?.items || []).map((item) => ({ ...item, provenance: sources.repairs.mode }));
+  const work = [
+    ...report.results.filter((item) => ['failed', 'warning'].includes(item.status)).map((item) => ({ id: item.id, title: resultTitle(item), status: item.status, detail: item.evidence.summary || item.evidence.warning || 'Review captured test evidence.', rank: priority(item.status), provenance: realReport ? 'live' : 'fixture' })),
+    ...repairs.filter((item) => item.status !== 'complete').map((item) => ({ id: item.id, title: item.title, status: item.priority === 'critical' ? 'failed' : 'warning', detail: item.branch ? `Repair is ready on ${item.branch}` : 'Suggested repair needs branch preparation.', rank: item.priority === 'critical' ? 0 : 2, provenance: item.provenance }))
+  ].sort((a, b) => a.rank - b.rank);
+  const content = (sources.content?.items || []).map((item) => ({ ...item, provenance: sources.content.mode }));
+  const assets = (sources.assets?.items || []).map((item) => ({ ...item, provenance: sources.assets.mode }));
+  const finance = (sources.finance?.items || []).map((item) => ({ ...item, provenance: sources.finance.mode }));
+  const money = (category) => finance.filter((item) => item.category === category).reduce((sum, item) => sum + item.amount, 0);
+  const sourceModes = Object.values(sources).map((source) => source.mode);
   return {
-    schemaVersion: REPORT_VERSION, generatedAt: new Date().toISOString(), mode: realReport ? 'live' : 'demonstration', source: realReport ? 'automation-6/report-v1' : 'built-in demonstration',
+    schemaVersion: REPORT_VERSION, generatedAt: new Date().toISOString(), mode: realReport && sourceModes.every((mode) => mode === 'live') ? 'live' : realReport ? 'mixed' : 'demonstration', source: realReport ? 'automation-6/report-v1 + configured adapters' : 'demonstration report + configured fixture adapters', sourceWarnings,
     overview: { status: report.status, ...report.summary, approvals: openApprovals.length, attention: work.length },
     nextApproval: openApprovals[0] || null,
-    nextTask: work[0] ? { id: work[0].id, title: resultTitle(work[0]), status: work[0].status, detail: work[0].evidence.summary || work[0].evidence.warning || 'Review captured test evidence.' } : null,
+    nextTask: work[0] || null,
     businesses: [{ id: 'ascension-digital', name: 'Ascension Digital', type: 'Portfolio', status: report.status, projects: 3 }, { id: 'raven-sharp', name: 'Raven Sharp', type: 'Website', status: report.results.some((item) => item.id.includes('raven') && item.status === 'failed') ? 'failed' : 'passed', projects: 1 }],
     runs: [{ id: report.runId, automation: 'Automation 6', status: report.status, startedAt: report.startedAt, finishedAt: report.finishedAt, summary: report.summary }],
     activity: report.results.slice().sort((a, b) => b.startedAt.localeCompare(a.startedAt)).map((item) => ({ id: item.id, title: resultTitle(item), kind: item.kind, status: item.status, at: item.startedAt, durationMs: item.durationMs, evidence: item.evidence })),
     approvals: openApprovals,
-    modules: [{ id: 'projects', label: 'Projects', count: 3, state: 'active' }, { id: 'monitors', label: 'Monitors & tests', count: report.results.length, state: 'active' }, { id: 'content', label: 'Content approvals', count: 0, state: 'ready' }, { id: 'assets', label: 'Assets & previews', count: report.results.filter((item) => item.kind === 'screenshots').length, state: 'ready' }, { id: 'finance', label: 'Finance & tax', count: 0, state: 'planned' }]
+    queues: { content, assets, repairs, finance },
+    financeSummary: { currency: finance[0]?.currency || 'AUD', income: money('income'), expenses: money('expense'), net: money('income') - money('expense'), needsReconciliation: finance.filter((item) => item.status === 'needs-reconciliation').length, provenance: sources.finance?.mode || 'unconfigured' },
+    modules: [{ id: 'projects', label: 'Projects', count: 3, state: 'active' }, { id: 'monitors', label: 'Monitors & tests', count: report.results.length, state: 'active' }, { id: 'content', label: 'Content approvals', count: content.filter((item) => item.status === 'awaiting-approval').length, state: sources.content?.mode || 'unconfigured' }, { id: 'assets', label: 'Assets & previews', count: assets.length, state: sources.assets?.mode || 'unconfigured' }, { id: 'repairs', label: 'Branch-ready repairs', count: repairs.filter((item) => item.status === 'branch-ready').length, state: sources.repairs?.mode || 'unconfigured' }, { id: 'finance', label: 'Finance & tax', count: finance.length, state: sources.finance?.mode || 'unconfigured' }]
   };
 }
 

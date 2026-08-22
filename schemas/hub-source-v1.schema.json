@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/hub-source-v1.json",
+  "title": "Automation 5 Hub Source Envelope",
+  "type": "object",
+  "required": ["schemaVersion", "kind", "mode", "updatedAt", "items"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "kind": { "enum": ["content", "assets", "finance", "repairs", "approvals"] },
+    "mode": { "enum": ["live", "fixture"] },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "items": { "type": "array", "items": { "type": "object", "required": ["id"] } }
+  },
+  "additionalProperties": false
+}

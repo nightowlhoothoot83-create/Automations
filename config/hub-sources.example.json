@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "sources": [
+    { "id": "content", "kind": "content", "adapter": "json-file", "path": "fixtures/hub/content.json", "enabled": true },
+    { "id": "assets", "kind": "assets", "adapter": "json-file", "path": "fixtures/hub/assets.json", "enabled": true },
+    { "id": "finance", "kind": "finance", "adapter": "json-file", "path": "fixtures/hub/finance.json", "enabled": true },
+    { "id": "repairs", "kind": "repairs", "adapter": "json-file", "path": "fixtures/hub/repairs.json", "enabled": true },
+    { "id": "approvals", "kind": "approvals", "adapter": "json-file", "path": "fixtures/hub/approvals.json", "enabled": true }
+  ]
+}
