@@ -9,7 +9,7 @@
     { "id": "image-optimiser", "publicUrl": "https://opt.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
     {
       "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null,
-      "requiredChecks": ["product-preview-generation", "image-generation-output-quality", "provider-migration-readiness", "save-and-reload-persistence"],
+      "requiredChecks": ["product-preview-generation", "image-generation-output-quality", "product-template-dimensions", "print-resolution", "print-format", "colour-profile", "transparency-when-required", "bleed-and-safe-area", "artifact-detection", "provider-migration-readiness", "save-and-reload-persistence"],
       "connectionsRequired": ["image-generation-provider-to-verify", "provider-credential-env", "webhook-endpoint"]
     }
   ],
@@ -22,5 +22,15 @@
   "functionalRule": "Every advertised capability must map to passing evidence; a visual pass cannot override any claim, API, workflow, preview, save, persistence, storage, or backend failure",
   "stripeRule": "Test mode or non-transactional inspection only; never complete a live charge",
   "pricingParityFields": ["tier-name", "amount", "currency", "billing-interval", "trial", "included-features-or-limits", "checkout-destination"],
+  "podPrintReadiness": {
+    "targetDpi": 300,
+    "dimensionsSource": "selected-product-provider-template",
+    "allowedFormats": ["PNG", "JPEG"],
+    "colourProfile": "sRGB unless the print provider specifies otherwise",
+    "requireTransparencyWhenProductNeedsIt": true,
+    "requireBleedAndSafeAreaValidation": true,
+    "rejectLowResolutionOrVisibleArtifacts": true,
+    "rule": "DPI metadata alone is insufficient; pixel dimensions must satisfy the selected product template at target print size"
+  },
   "remediationRule": "Any failure or mismatch returns to the development workflow and requires new passing evidence before deployment approval"
 }

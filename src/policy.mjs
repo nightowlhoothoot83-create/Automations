@@ -34,6 +34,8 @@ export function validateSaasVerificationContract(contract) {
   if (!/never complete a live charge/i.test(contract.stripeRule)) throw new Error('Stripe verification must forbid live charges');
   for (const field of ['tier-name', 'amount', 'currency', 'billing-interval', 'trial', 'included-features-or-limits', 'checkout-destination']) if (!contract.pricingParityFields.includes(field)) throw new Error(`Missing pricing parity field: ${field}`);
   if (!/requires new passing evidence/i.test(contract.remediationRule)) throw new Error('Remediation must require fresh passing evidence');
+  const print = contract.podPrintReadiness;
+  if (print?.targetDpi !== 300 || print.dimensionsSource !== 'selected-product-provider-template' || !print.requireBleedAndSafeAreaValidation || !print.rejectLowResolutionOrVisibleArtifacts || !/DPI metadata alone is insufficient/i.test(print.rule)) throw new Error('POD print-readiness contract is incomplete');
   return contract;
 }
 
