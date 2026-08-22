@@ -7,12 +7,16 @@
     { "id": "content-creator", "publicUrl": "https://content.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
     { "id": "smart-cleaner", "publicUrl": "https://cleaner.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
     { "id": "image-optimiser", "publicUrl": "https://opt.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
-    { "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null }
+    {
+      "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null,
+      "requiredChecks": ["product-preview-generation", "image-generation-output-quality", "provider-migration-readiness", "save-and-reload-persistence"],
+      "connectionsRequired": ["image-generation-provider-to-verify", "provider-credential-env", "webhook-endpoint"]
+    }
   ],
   "requiredSurfaces": [
     "public-frontend", "core-product-information", "pricing", "pricing-stripe-parity", "authentication", "dashboard",
     "advertised-claim-coverage", "every-core-feature-workflow", "api-calls", "preview-or-rendering", "results-or-output",
-    "save-and-reload-persistence", "storage-read-write", "backend-health", "stripe-test-surface",
+    "save-and-reload-persistence", "storage-read-write", "backend-health", "webhook-delivery", "stripe-test-surface",
     "privacy", "terms", "contact-or-support", "header", "footer", "desktop", "mobile"
   ],
   "functionalRule": "Every advertised capability must map to passing evidence; a visual pass cannot override any claim, API, workflow, preview, save, persistence, storage, or backend failure",
