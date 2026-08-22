@@ -16,6 +16,12 @@ The hub API response is a presentation view, not a worker reporting contract. Ma
 
 The checked-in `fixtures/hub/` records make each module testable without credentials or external mutations. A broken adapter degrades independently and produces a visible source warning instead of taking down Automation 6 monitoring evidence.
 
+## Worker results and durable history
+
+`config/hub-workers.example.json` registers Automation 6 as a live hub-index reader and Automation 2 as an unmistakable fixture report. Both declare `automation-6/report-v1@1.0.0`; this reuses Automation 6's schema ownership rather than creating a competing result shape. Override the registry with `HUB_WORKERS_CONFIG`. Missing indexes and incompatible results degrade into dashboard warnings.
+
+Owner decisions append v1 events to ignored `data/hub/activity-v1.jsonl` and update the local current-state index. The dashboard shows event ID, actor, timestamp, decision, and provenance. Malformed journal lines are skipped with visible warnings, preserving valid history. `HUB_HISTORY_PATH` supports isolated local testing and future storage adapters.
+
 ## Current boundaries and decision points
 
 - When `artifacts/hub/runs-v1.json` is absent, the dashboard enters a prominent demonstration mode. Sample data is never represented as a live run.

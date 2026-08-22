@@ -1,4 +1,5 @@
 const operationsStyles = document.createElement('link'); operationsStyles.rel = 'stylesheet'; operationsStyles.href = 'operations.css'; document.head.append(operationsStyles);
+const historyStyles = document.createElement('link'); historyStyles.rel = 'stylesheet'; historyStyles.href = 'history.css'; document.head.append(historyStyles);
 let dashboard;
 const $ = (selector) => document.querySelector(selector);
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
@@ -29,11 +30,12 @@ function render(data) {
   $('#asset-list').innerHTML = data.queues.assets.map((item) => `<div class="queue-row"><div class="preview-tile">${item.type === 'screenshot' ? '▣' : '◇'}</div><div class="row-main"><b>${esc(item.title)}</b><small>${esc(item.business)} · ${esc(item.status)}</small></div><span class="source-pill">${esc(item.provenance)}</span></div>`).join('') || '<p class="muted">No asset source configured.</p>';
   const sourceHeaders = document.querySelectorAll('.operations-grid .panel-head .source-pill');
   [data.queues.repairs[0]?.provenance, data.queues.content[0]?.provenance, finance.provenance, data.queues.assets[0]?.provenance].forEach((mode,index) => { sourceHeaders[index].textContent = `${mode || 'unconfigured'}${index === 2 ? ' · estimates' : ' adapter'}`.toUpperCase(); });
+  $('#decision-list').innerHTML = data.decisionHistory.map((item) => `<div class="decision-row ${esc(item.decision)}"><span class="decision-mark"></span><div><b>${esc(item.title)}</b><small>${esc(item.actor)} · event ${esc(item.eventId.slice(0,8))}</small></div><span class="provenance">${esc(item.provenance)}</span><time>${when(item.recordedAt)}</time></div>`).join('') || '<p class="muted">No decisions recorded yet. Approval and deferral actions will appear here with timestamps and local event IDs.</p>';
   $('#updated').textContent = `Updated ${when(data.generatedAt)} · ${data.source}`;
 }
 function renderActivity(filter) {
   const items = dashboard.activity.filter((item) => filter === 'all' || item.status === filter);
-  $('#activity-list').innerHTML = items.map((item) => `<div class="activity-row ${item.status}"><span class="status-dot"></span><div class="activity-icon">${item.kind === 'health' ? '♥' : item.kind === 'seo' ? 'S' : item.kind === 'links' ? '↗' : '✓'}</div><div class="row-main"><b>${esc(item.title)}</b><small>${esc(item.kind)} · ${item.durationMs} ms</small></div><code class="evidence">${esc(JSON.stringify(item.evidence))}</code><time>${when(item.at)}</time></div>`).join('') || '<p class="muted">No activity matches this filter.</p>';
+  $('#activity-list').innerHTML = items.map((item) => `<div class="activity-row ${item.status}"><span class="status-dot"></span><div class="activity-icon">${item.kind === 'health' ? '♥' : item.kind === 'seo' ? 'S' : item.kind === 'links' ? '↗' : '✓'}</div><div class="row-main"><b>${esc(item.title)}</b><small>${esc(item.kind)} · ${item.durationMs} ms · ${esc(item.provenance || 'live')}</small></div><code class="evidence">${esc(JSON.stringify(item.evidence))}</code><time>${when(item.at)}</time></div>`).join('') || '<p class="muted">No activity matches this filter.</p>';
 }
 async function load() { const response = await fetch('/api/dashboard'); if (!response.ok) throw new Error('Dashboard could not be loaded'); render(await response.json()); }
 document.addEventListener('click', async (event) => {

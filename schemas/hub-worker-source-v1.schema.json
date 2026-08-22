@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/hub-worker-source-v1.json",
+  "title": "Automation 5 Worker Result Registry",
+  "type": "object",
+  "required": ["schemaVersion", "workers"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "workers": { "type": "array", "items": { "$ref": "#/$defs/worker" } }
+  },
+  "$defs": {
+    "worker": {
+      "type": "object",
+      "required": ["id", "label", "enabled", "mode", "contract", "adapter"],
+      "properties": {
+        "id": { "type": "string" }, "label": { "type": "string" }, "enabled": { "type": "boolean" },
+        "mode": { "enum": ["live", "fixture"] }, "contract": { "const": "automation-6/report-v1@1.0.0" },
+        "adapter": { "enum": ["hub-index", "report-file"] }, "path": { "type": "string" }
+      }
+    }
+  }
+}
