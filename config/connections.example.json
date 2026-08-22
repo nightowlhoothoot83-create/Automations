@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "connections": [
+    {
+      "id": "github-primary",
+      "type": "github",
+      "enabled": false,
+      "settings": { "repository": null, "workflow": null, "apiBaseUrl": "https://api.github.com" },
+      "credentialEnv": "AUTOMATION_GITHUB_TOKEN"
+    },
+    {
+      "id": "cloudflare-primary",
+      "type": "cloudflare",
+      "enabled": false,
+      "settings": { "accountId": null, "projectName": null, "apiBaseUrl": "https://api.cloudflare.com/client/v4" },
+      "credentialEnv": "AUTOMATION_CLOUDFLARE_API_TOKEN"
+    },
+    {
+      "id": "management-hub",
+      "type": "management-hub",
+      "enabled": false,
+      "settings": { "endpoint": null, "storagePath": "artifacts/hub", "logPath": "artifacts/logs" },
+      "credentialEnv": "AUTOMATION_HUB_TOKEN"
+    },
+    {
+      "id": "mock-development",
+      "type": "mock",
+      "enabled": true,
+      "settings": { "fixturePath": "fixtures/connections/mock-success.json" },
+      "credentialEnv": null
+    }
+  ]
+}

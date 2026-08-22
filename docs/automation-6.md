@@ -30,3 +30,5 @@ Each run atomically updates `artifacts/hub/runs-v1.json`, a bounded, deduplicate
 ## Scheduling and integrations
 
 The CLI is scheduler-neutral so Windows Task Scheduler, GitHub Actions, or a Management Hub worker can invoke it later. `.github/workflows/automation-6.yml` defines a Monday 03:17 UTC read-only run and manual trigger with `contents: read`; it cannot run until the repository is intentionally connected and published. Cloudflare support should be added as an adapter only after account/environment ownership is known; no Wrangler configuration or Worker is created speculatively.
+
+All GitHub, Railway, Cloudflare, URL, workflow, monitoring, storage, logging, and Hub destinations are external configuration. `config/connections.example.json` contains disabled templates and environment-variable names only. `src/connections-cli.mjs` validates and reports readiness without contacting live services; `docs/connections-required.md` tracks verified discovery, gaps, and exact activation steps.

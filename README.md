@@ -14,3 +14,5 @@ node --test
 ```
 
 Generated runs are stored under `artifacts/runs/<run-id>/` with a `report.json`, `events.jsonl`, and screenshot request records. See [docs/automation-6.md](docs/automation-6.md) for the safety model and integration contract.
+
+External systems are configured through environment-referenced connection profiles. Run `node src/connections-cli.mjs` for a no-network readiness report and see [docs/connections-required.md](docs/connections-required.md) for verified discoveries and activation requirements.

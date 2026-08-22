@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "discoveredAt": "2026-08-22",
+  "source": "gh read-only API using existing authenticated session",
+  "account": "nightowlhoothoot83-create",
+  "repositories": [
+    "ADG-MONITOR-V4", "Ascension-Digital-Group", "Mycalctools", "Mycalendartools", "Mystical-Moments",
+    "Natures-Sacred-Synergy", "Natures-Synergy-Services", "OpenACM", "Raven-Sharp-Ad-Manager",
+    "Raven-Sharp-Book-Creator", "Raven-Sharp-Content-Creator", "Raven-Sharp-Hub",
+    "Raven-Sharp-Image-Optimiser-Upscaler", "Raven-Sharp-POD-Automation", "Raven-Sharp-QA-Agent",
+    "Raven-Sharp-Smart-AI-Cleaner", "Raven-Sharp-Smart-Cleaner-Web", "Raven-Sharp-Store-Ops", "Wheelnamepicker"
+  ],
+  "verifiedHomepageUrls": { "OpenACM": "https://openacm.jsonproductions.com/" },
+  "relevantActiveWorkflows": {
+    "Mycalctools": [".github/workflows/adsense-integrity.yml"],
+    "Mycalendartools": [".github/workflows/indexing-integrity.yml"],
+    "Wheelnamepicker": [".github/workflows/indexing-integrity.yml"],
+    "ADG-MONITOR-V4": [".github/workflows/ci.yml"],
+    "Raven-Sharp-Content-Creator": [".github/workflows/test-and-build.yml"],
+    "Raven-Sharp-Book-Creator": [".github/workflows/test-and-build.yml"]
+  }
+}

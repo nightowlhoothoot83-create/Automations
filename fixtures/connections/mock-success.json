@@ -1,0 +1,5 @@
+{
+  "reachable": true,
+  "service": "local-mock",
+  "checks": { "repository": "passed", "workflow": "passed", "monitoring": "passed", "storage": "passed" }
+}

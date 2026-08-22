@@ -7,7 +7,8 @@
     "check": "node --test",
     "automation:6": "node src/cli.mjs",
     "orchestrate:dry-run": "node src/orchestrate.mjs",
-    "orchestrate": "node src/orchestrate.mjs --execute"
+    "orchestrate": "node src/orchestrate.mjs --execute",
+    "connections:check": "node src/connections-cli.mjs"
   },
   "engines": { "node": ">=20" }
 }

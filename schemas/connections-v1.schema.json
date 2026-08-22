@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/connections-v1.json",
+  "type": "object",
+  "required": ["schemaVersion", "connections"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "enabled", "settings", "credentialEnv"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "type": { "enum": ["github", "cloudflare", "management-hub", "monitoring", "storage", "logging", "mock"] },
+          "enabled": { "type": "boolean" },
+          "settings": { "type": "object" },
+          "credentialEnv": { "type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]*$" }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
