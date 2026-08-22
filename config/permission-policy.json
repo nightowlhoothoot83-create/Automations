@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "appliesTo": ["automation-1", "automation-5", "automation-6"],
+  "appliesTo": ["automation-1", "automation-2", "automation-5", "automation-6"],
   "autonomous": [
     "local-development", "feature-branch-changes", "tests", "builds", "reports", "screenshots",
     "artifact-generation", "workflow-definition", "non-production-scheduling", "branch-repair", "local-dev-storage"

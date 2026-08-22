@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "artifacts": {
+    "runs": { "path": "artifacts/runs", "maxAgeDays": 30, "maxItems": 100 },
+    "logs": { "path": "artifacts/logs", "maxAgeDays": 14, "maxItems": 250 },
+    "screenshots": { "path": "artifacts/screenshots", "maxAgeDays": 14, "maxItems": 100 }
+  },
+  "deletionMode": "local-generated-only"
+}

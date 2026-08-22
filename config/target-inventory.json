@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "discoverySource": "config/discovery/github-repositories.json",
+  "targets": [
+    { "id": "github-mycalctools", "kind": "github-repository", "locator": "nightowlhoothoot83-create/Mycalctools", "selection": "candidate", "capabilities": ["adsense", "workflow-monitoring"], "workflowPaths": [".github/workflows/adsense-integrity.yml"] },
+    { "id": "github-mycalendartools", "kind": "github-repository", "locator": "nightowlhoothoot83-create/Mycalendartools", "selection": "candidate", "capabilities": ["indexing", "workflow-monitoring"], "workflowPaths": [".github/workflows/indexing-integrity.yml"] },
+    { "id": "github-wheelnamepicker", "kind": "github-repository", "locator": "nightowlhoothoot83-create/Wheelnamepicker", "selection": "candidate", "capabilities": ["indexing", "workflow-monitoring"], "workflowPaths": [".github/workflows/indexing-integrity.yml"] },
+    { "id": "github-adg-monitor", "kind": "github-repository", "locator": "nightowlhoothoot83-create/ADG-MONITOR-V4", "selection": "candidate", "capabilities": ["ci", "workflow-monitoring"], "workflowPaths": [".github/workflows/ci.yml"] },
+    { "id": "github-content-creator", "kind": "github-repository", "locator": "nightowlhoothoot83-create/Raven-Sharp-Content-Creator", "selection": "candidate", "capabilities": ["build", "regression", "workflow-monitoring"], "workflowPaths": [".github/workflows/test-and-build.yml"] },
+    { "id": "github-book-creator", "kind": "github-repository", "locator": "nightowlhoothoot83-create/Raven-Sharp-Book-Creator", "selection": "candidate", "capabilities": ["build", "regression", "workflow-monitoring"], "workflowPaths": [".github/workflows/test-and-build.yml"] },
+    { "id": "site-openacm", "kind": "website", "locator": "https://openacm.jsonproductions.com/", "selection": "candidate", "capabilities": ["health", "links", "seo", "screenshot"], "workflowPaths": [] }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "consumers": {
+    "automation-1": ["adsense", "indexing", "seo"],
+    "automation-2": ["build", "ci", "regression", "workflow-monitoring"],
+    "automation-5": ["health", "links", "screenshot", "workflow-monitoring"],
+    "automation-6": ["adsense", "build", "ci", "health", "indexing", "links", "regression", "seo", "screenshot", "workflow-monitoring"]
+  }
+}

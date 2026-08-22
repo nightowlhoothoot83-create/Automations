@@ -27,6 +27,8 @@ jobs:
         run: node src/orchestrate.mjs
       - name: Validate connection readiness without live calls
         run: node src/connections-cli.mjs
+      - name: Validate schedules and retention dry-run
+        run: node src/policy-cli.mjs
       - name: Run read-only checks
         run: node src/cli.mjs --config config/targets.example.json
       - name: Upload structured evidence
