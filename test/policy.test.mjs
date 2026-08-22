@@ -1,5 +1,5 @@
 import test from 'node:test'; import assert from 'node:assert/strict'; import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'; import { tmpdir } from 'node:os'; import path from 'node:path';
-import { validateTargetSelection, validateSchedules, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
+import { validateTargetSelection, validateSchedules, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
 
 test('discovered candidates cannot be silently selected', () => {
   const inventory = { schemaVersion: '1.0.0', targets: [{ id: 'candidate', selection: 'candidate' }, { id: 'approved', selection: 'approved' }] };
@@ -22,4 +22,9 @@ test('production approval items route to local Hub storage', async () => {
   const cwd = await mkdtemp(path.join(tmpdir(), 'approvals-')); const routes = { routes: [{ destination: 'artifacts/hub/approvals-v1.json', actionClasses: ['live-cloudflare-deployment'] }] };
   const item = { id: 'approval-1', actionClass: 'live-cloudflare-deployment', status: 'pending' }; const destination = await routeApproval(item, routes, cwd);
   assert.equal(JSON.parse(await readFile(destination, 'utf8')).items[0].id, 'approval-1');
+});
+
+test('six-product SaaS contract requires visual, functional, legal, backend and safe billing surfaces', async () => {
+  const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8'));
+  assert.equal(validateSaasVerificationContract(contract).products.length, 6); assert.equal(contract.mode, 'read-only');
 });

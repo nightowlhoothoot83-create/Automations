@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "read-only",
+  "products": [
+    { "id": "ad-manager", "publicUrl": "https://ads.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    { "id": "book-creator", "publicUrl": "https://books.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    { "id": "content-creator", "publicUrl": "https://content.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    { "id": "smart-cleaner", "publicUrl": "https://cleaner.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    { "id": "image-optimiser", "publicUrl": "https://opt.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    { "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null }
+  ],
+  "requiredSurfaces": [
+    "public-frontend", "core-product-information", "pricing", "authentication", "dashboard",
+    "every-core-feature-workflow", "results-or-output", "backend-health", "stripe-test-surface",
+    "privacy", "terms", "contact-or-support", "header", "footer", "desktop", "mobile"
+  ],
+  "functionalRule": "A visual pass cannot override a functional failure",
+  "stripeRule": "Test mode or non-transactional inspection only; never complete a live charge"
+}
