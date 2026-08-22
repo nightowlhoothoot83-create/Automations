@@ -4,6 +4,13 @@
   "sampleCountPerPrompt": 4,
   "prompts": [],
   "targetProductTemplates": [],
+  "promptStrategy": {
+    "primary": "trend-informed-original-concept",
+    "includeEvergreenControl": true,
+    "styleCoverage": ["personal-handmade", "heritage-craft", "modern-maximalism", "surreal-dreamscape", "nostalgic", "playful-pattern"],
+    "recordTrendEvidence": true,
+    "rejectCopiedOrProtectedContent": true
+  },
   "providers": [
     { "id": "current-runware", "provider": "Runware", "model": null, "credentialEnv": "RUNWARE_API_KEY" },
     { "id": "candidate-flux-schnell", "provider": "fal.ai", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" }

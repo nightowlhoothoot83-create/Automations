@@ -34,5 +34,23 @@
     "rejectLowResolutionOrVisibleArtifacts": true,
     "rule": "DPI metadata alone is insufficient; pixel dimensions must satisfy the selected product template at target print size"
   },
+  "podTrendIntelligence": {
+    "enabledByDefault": true,
+    "mode": "read-only-research",
+    "refreshCadence": "daily-or-before-a-generation-batch",
+    "configurableSources": ["marketplace-search-trends", "social-trend-signals", "print-provider-trend-feeds", "seasonal-calendar"],
+    "signals": ["rising-topics", "colour-palettes", "visual-styles", "patterns", "product-categories", "audience-niches", "seasonality", "trend-velocity", "saturation-risk"],
+    "firstGenerationChoice": "trend-informed-original-concept",
+    "fallbackChoice": "evergreen-niche-concept",
+    "rules": [
+      "Use current trend signals as creative direction, not as assets to copy",
+      "Prefer trends relevant to the selected audience, product and marketplace",
+      "Reject protected characters, brands, logos, celebrity likenesses, copied artwork and unsafe themes",
+      "Avoid generic AI sameness and oversaturated trends unless the concept adds a distinctive angle",
+      "Record source, capture time, signal age and rationale with every trend-informed prompt",
+      "Keep generated work in review until originality, print readiness, product fit and owner approval pass"
+    ],
+    "requiredEvidence": ["source-reference", "captured-at", "trend-summary", "target-audience", "target-product", "prompt-rationale", "originality-check", "saturation-assessment"]
+  },
   "remediationRule": "Any failure or mismatch returns to the development workflow and requires new passing evidence before deployment approval"
 }

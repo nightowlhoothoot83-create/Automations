@@ -33,4 +33,11 @@ test('POD provider benchmark is disabled and uses matched blind analysis', async
   const benchmark = JSON.parse(await readFile('config/pod-provider-ab-test.example.json', 'utf8'));
   assert.equal(benchmark.enabled, false); assert.equal(benchmark.providers.length, 2); assert.equal(benchmark.analysis.blindProviderLabels, true);
   assert.ok(benchmark.providers.some((provider) => provider.credentialEnv === 'FAL_KEY')); assert.equal(benchmark.ownerReviewPresentation.createSideBySideImage, true); assert.equal(benchmark.ownerReviewPresentation.showRawRunwareOutput, true); assert.equal(benchmark.ownerReviewPresentation.showRawFluxOutput, true); assert.match(benchmark.selectionRule, /owner review/);
+  assert.equal(benchmark.promptStrategy.primary, 'trend-informed-original-concept'); assert.equal(benchmark.promptStrategy.includeEvergreenControl, true); assert.equal(benchmark.promptStrategy.rejectCopiedOrProtectedContent, true);
+});
+
+test('POD trend intelligence is current, attributable and originality gated', async () => {
+  const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8'));
+  assert.equal(contract.podTrendIntelligence.enabledByDefault, true); assert.equal(contract.podTrendIntelligence.firstGenerationChoice, 'trend-informed-original-concept');
+  assert.ok(contract.podTrendIntelligence.requiredEvidence.includes('captured-at')); assert.ok(contract.podTrendIntelligence.rules.some((rule) => /protected/.test(rule)));
 });
