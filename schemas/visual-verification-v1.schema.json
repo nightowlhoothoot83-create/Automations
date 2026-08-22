@@ -2,9 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.invalid/schemas/visual-verification-v1.json",
   "type": "object",
-  "required": ["schemaVersion", "baselineUpdatesEnabled", "pages"],
+  "required": ["schemaVersion", "evidenceClass", "baselineUpdatesEnabled", "pages"],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
+    "evidenceClass": { "enum": ["test-fixture", "live-site"] },
     "baselineUpdatesEnabled": { "const": false },
     "pages": {
       "type": "array",
@@ -17,12 +18,13 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "required", "expectedApprovedState", "actualState", "result", "issue", "fix", "screenshotReference", "retestResult"],
+              "required": ["id", "required", "expectedApprovedState", "actualState", "result", "issue", "fix", "screenshotReference", "capturedAt", "retestResult"],
               "properties": {
                 "id": { "type": "string" }, "required": { "type": "boolean" },
                 "expectedApprovedState": { "type": "string" }, "actualState": { "type": "string" },
                 "result": { "enum": ["pass", "fail"] }, "issue": { "type": ["string", "null"] },
                 "fix": { "type": ["string", "null"] }, "screenshotReference": { "type": "string" },
+                "capturedAt": { "type": ["string", "null"], "format": "date-time" },
                 "retestResult": { "enum": ["pass", "fail", "not-run"] }
               },
               "additionalProperties": false

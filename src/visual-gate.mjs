@@ -1,5 +1,6 @@
 export function evaluateVisualMatrix(matrix) {
   if (matrix?.schemaVersion !== '1.0.0' || !Array.isArray(matrix.pages)) throw new Error('Unsupported visual verification matrix');
+  if (!['test-fixture', 'live-site'].includes(matrix.evidenceClass)) throw new Error('Visual matrix requires an explicit evidenceClass');
   if (matrix.baselineUpdatesEnabled !== false) throw new Error('Baseline updates must remain disabled in the verification matrix');
   const results = []; const ids = new Set();
   for (const page of matrix.pages) {
@@ -9,14 +10,16 @@ export function evaluateVisualMatrix(matrix) {
       for (const field of ['expectedApprovedState', 'actualState', 'result', 'screenshotReference', 'retestResult']) if (!item[field]) throw new Error(`${key} requires ${field}`);
       if (!['pass', 'fail'].includes(item.result) || !['pass', 'fail', 'not-run'].includes(item.retestResult)) throw new Error(`${key} has invalid result`);
       const knownFailure = item.result === 'fail' || item.retestResult === 'fail' || Boolean(item.issue);
+      const hasLiveEvidence = matrix.evidenceClass === 'live-site' && Boolean(item.screenshotReference) && Boolean(item.capturedAt) && !Number.isNaN(Date.parse(item.capturedAt));
       const verifiedPass = item.result === 'pass' && item.retestResult === 'pass' && !item.issue;
-      results.push({ pageId: page.pageId, itemId: item.id, required: item.required, verifiedPass, knownFailure });
+      results.push({ pageId: page.pageId, itemId: item.id, required: item.required, verifiedPass, knownFailure, hasLiveEvidence });
     }
   }
   const required = results.filter((item) => item.required);
   const knownFailures = results.filter((item) => item.knownFailure);
-  const eligibleForBaselineApproval = required.length > 0 && required.every((item) => item.verifiedPass) && knownFailures.length === 0;
-  return { eligibleForBaselineApproval, requiredCount: required.length, verifiedPassCount: required.filter((item) => item.verifiedPass).length, knownFailureCount: knownFailures.length, results };
+  const liveEvidenceCount = required.filter((item) => item.hasLiveEvidence).length;
+  const eligibleForBaselineApproval = matrix.evidenceClass === 'live-site' && required.length > 0 && required.every((item) => item.verifiedPass && item.hasLiveEvidence) && knownFailures.length === 0;
+  return { evidenceClass: matrix.evidenceClass, eligibleForBaselineApproval, requiredCount: required.length, verifiedPassCount: required.filter((item) => item.verifiedPass).length, liveEvidenceCount, knownFailureCount: knownFailures.length, results };
 }
 
 export function createBaselineApproval(matrix, evaluation, sourcePath) {

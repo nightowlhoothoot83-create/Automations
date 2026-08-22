@@ -1,10 +1,11 @@
 {
   "schemaVersion": "1.0.0",
+  "evidenceClass": "test-fixture",
   "baselineUpdatesEnabled": false,
   "pages": [{
     "pageId": "fixture-degraded", "url": "http://127.0.0.1/fixture-degraded",
     "items": [
-      { "id": "mobile-overflow", "required": true, "expectedApprovedState": "No horizontal overflow at 390px", "actualState": "CTA extends beyond viewport", "result": "fail", "issue": "Horizontal overflow", "fix": "Constrain CTA width", "screenshotReference": "fixtures/references/fixture-degraded-mobile.png", "retestResult": "not-run" }
+      { "id": "mobile-overflow", "required": true, "expectedApprovedState": "No horizontal overflow at 390px", "actualState": "CTA extends beyond viewport", "result": "fail", "issue": "Horizontal overflow", "fix": "Constrain CTA width", "screenshotReference": "fixtures/references/fixture-degraded-mobile.png", "capturedAt": null, "retestResult": "not-run" }
     ]
   }]
 }
