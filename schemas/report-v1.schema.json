@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/automation-report-v1.json",
+  "title": "Automation 6 Run Report",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "startedAt", "finishedAt", "status", "summary", "results", "approvals"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "runId": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "finishedAt": { "type": "string", "format": "date-time" },
+    "status": { "enum": ["passed", "warning", "failed"] },
+    "summary": {
+      "type": "object",
+      "required": ["passed", "warning", "failed", "skipped"],
+      "properties": {
+        "passed": { "type": "integer", "minimum": 0 },
+        "warning": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "results": { "type": "array", "items": { "$ref": "#/$defs/result" } },
+    "approvals": { "type": "array", "items": { "$ref": "#/$defs/approval" } }
+  },
+  "$defs": {
+    "result": {
+      "type": "object",
+      "required": ["id", "kind", "status", "startedAt", "durationMs", "evidence"],
+      "properties": {
+        "id": { "type": "string" }, "kind": { "type": "string" },
+        "status": { "enum": ["passed", "warning", "failed", "skipped"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "durationMs": { "type": "integer", "minimum": 0 },
+        "evidence": { "type": "object" }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": ["id", "action", "reason", "risk", "status"],
+      "properties": {
+        "id": { "type": "string" }, "action": { "type": "string" }, "reason": { "type": "string" },
+        "risk": { "enum": ["low", "medium", "high"] }, "status": { "const": "pending" }
+      }
+    }
+  }
+}

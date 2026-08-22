@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "defaults": { "timeoutMs": 10000, "maxBodyBytes": 1000000 },
+  "targets": [
+    {
+      "id": "example-site",
+      "url": "https://example.com/",
+      "checks": ["health", "seo", "links"],
+      "screenshot": { "enabled": true, "viewport": { "width": 1440, "height": 900 } }
+    }
+  ],
+  "commands": []
+}

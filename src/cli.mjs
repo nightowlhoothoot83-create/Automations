@@ -1,0 +1,20 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { REPORT_SCHEMA_VERSION, validateConfig, checkTarget, runCommand, writeRun } from './core.mjs';
+
+const args = process.argv.slice(2); const configPath = args[args.indexOf('--config') + 1] || 'config/targets.example.json';
+const config = validateConfig(JSON.parse(await readFile(configPath, 'utf8')));
+const startedAt = new Date().toISOString();
+const runId = `${startedAt.replace(/[:.]/g, '-')}-${process.pid}`;
+const results = [];
+for (const target of config.targets) results.push(...await checkTarget(target, config.defaults));
+for (const command of config.commands) results.push(await runCommand(command, process.cwd()));
+const summary = { passed: 0, warning: 0, failed: 0, skipped: 0 }; for (const item of results) summary[item.status]++;
+const approvals = [];
+const screenshotRequests = config.targets.filter((t) => t.screenshot?.enabled).map((t) => ({ targetId: t.id, url: t.url, viewport: t.screenshot.viewport, status: 'pending-renderer' }));
+if (screenshotRequests.length) approvals.push({ id: `screenshots-${runId}`, action: 'Connect an approved browser renderer', reason: 'The core runner records requests but does not install or execute a browser implicitly.', risk: 'low', status: 'pending' });
+const status = summary.failed ? 'failed' : summary.warning || approvals.length ? 'warning' : 'passed';
+const report = { schemaVersion: REPORT_SCHEMA_VERSION, runId, startedAt, finishedAt: new Date().toISOString(), status, summary, results, approvals, source: { config: path.resolve(configPath), gitSha: process.env.GITHUB_SHA ?? null } };
+const dir = await writeRun(path.resolve('artifacts/runs'), report, screenshotRequests);
+console.log(JSON.stringify({ runId, status, summary, report: path.join(dir, 'report.json') }));
+process.exitCode = summary.failed ? 1 : 0;
