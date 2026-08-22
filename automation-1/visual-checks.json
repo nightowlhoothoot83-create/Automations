@@ -1,0 +1,19 @@
+{
+  "owner": "automation-1",
+  "consumer": "automation-6",
+  "viewports": [
+    { "name": "desktop", "width": 1280, "height": 720 },
+    { "name": "mobile", "width": 390, "height": 844 }
+  ],
+  "pages": [
+    { "id": "hub", "url": "https://raven-sharp.com/" },
+    { "id": "image-login", "url": "https://opt.raven-sharp.com/login" },
+    { "id": "pod-login", "url": "https://pod.raven-sharp.com/login" },
+    { "id": "ad-manager", "url": "https://ads.raven-sharp.com/" },
+    { "id": "book-creator", "url": "https://books.raven-sharp.com/" },
+    { "id": "content-creator", "url": "https://content.raven-sharp.com/" },
+    { "id": "smart-cleaner-web", "url": "https://cleaner.raven-sharp.com/" }
+  ],
+  "assertions": ["no-horizontal-overflow", "no-console-errors", "shared-header-present", "shared-footer-present", "primary-cta-visible"],
+  "notes": "Smart Cleaner app is deliberately absent; this contract covers Smart Cleaner web SaaS only."
+}
