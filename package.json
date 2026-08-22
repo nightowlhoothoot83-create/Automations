@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "check": "node --test",
+    "hub": "node src/hub/server.mjs",
     "automation:6": "node src/cli.mjs",
     "orchestrate:dry-run": "node src/orchestrate.mjs",
     "orchestrate": "node src/orchestrate.mjs --execute"

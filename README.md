@@ -14,3 +14,7 @@ node --test
 ```
 
 Generated runs are stored under `artifacts/runs/<run-id>/` with a `report.json`, `events.jsonl`, and screenshot request records. See [docs/automation-6.md](docs/automation-6.md) for the safety model and integration contract.
+
+## Automation 5: Ascension Digital Management Hub
+
+The local owner dashboard ingests Automation 6's `report-v1` contract without reshaping its evidence. Start it with `npm run hub`, then open `http://127.0.0.1:4175`. When no run exists, the UI uses clearly labelled demonstration data. No production action is executed by the hub.

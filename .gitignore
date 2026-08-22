@@ -1,6 +1,8 @@
 # Dependencies and generated output
 node_modules/
 artifacts/
+data/hub/*.json
+!data/hub/.gitkeep
 coverage/
 
 # Local configuration and secrets
