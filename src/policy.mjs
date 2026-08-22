@@ -36,6 +36,8 @@ export function validateSaasVerificationContract(contract) {
   if (!/requires new passing evidence/i.test(contract.remediationRule)) throw new Error('Remediation must require fresh passing evidence');
   const print = contract.podPrintReadiness;
   if (print?.targetDpi !== 300 || print.dimensionsSource !== 'selected-product-provider-template' || !print.requireBleedAndSafeAreaValidation || !print.rejectLowResolutionOrVisibleArtifacts || !/DPI metadata alone is insufficient/i.test(print.rule)) throw new Error('POD print-readiness contract is incomplete');
+  const pod = contract.products.find((product) => product.id === 'pod-automation');
+  if (pod?.imageGenerationProvider?.provider !== 'fal.ai' || pod.imageGenerationProvider.model !== 'FLUX.1 Schnell' || pod.imageGenerationProvider.credentialEnv !== 'FAL_KEY') throw new Error('POD fal.ai FLUX.1 Schnell provider configuration is incomplete');
   return contract;
 }
 
