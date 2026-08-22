@@ -25,3 +25,7 @@ Last verified: 2026-08-22. Discovery was read-only. No token values, credentials
 3. Run `node src/connections-cli.mjs --config config/connections.local.json` to validate readiness without calling live APIs.
 4. Exercise adapters against fixtures or local mock servers, then explicitly enable read-only polling.
 5. Treat merge to main/production, live Cloudflare deployment, production DNS/secrets, destructive production operations, and live production mutation as approval-gated actions.
+
+## Temporary fal.ai comparison key
+
+Create a separate restricted/test key for the A/B comparison and revoke it afterward. Do not paste it into chat, a command line, source, or configuration. `scripts/run-with-fal-key.ps1` requests the key with hidden input, exposes it only to the child comparison process as `FAL_KEY`, and removes it immediately afterward. Production should use a different key placed into the approved hosting platform's secret manager only when deployment is authorized.
