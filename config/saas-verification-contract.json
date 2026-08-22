@@ -6,7 +6,10 @@
     { "id": "book-creator", "publicUrl": "https://books.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
     { "id": "content-creator", "publicUrl": "https://content.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
     { "id": "smart-cleaner", "publicUrl": "https://cleaner.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
-    { "id": "image-optimiser", "publicUrl": "https://opt.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null },
+    {
+      "id": "image-optimiser", "publicUrl": "https://opt.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null,
+      "requiredChecks": ["physical-print-size-planning", "target-dpi", "source-effective-resolution", "upscale-factor", "provider-dimension-limits", "tiled-upscale-when-required", "seam-detection", "fine-art-detail-preservation", "colour-profile", "output-format", "estimated-cost-before-run", "tier-quota-protection", "large-output-storage-and-download"]
+    },
     {
       "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null,
       "requiredChecks": ["product-preview-generation", "image-generation-output-quality", "provider-ab-same-prompt-analysis", "product-template-dimensions", "print-resolution", "print-format", "colour-profile", "transparency-when-required", "bleed-and-safe-area", "artifact-detection", "provider-migration-readiness", "save-and-reload-persistence"],
@@ -57,6 +60,29 @@
       "Keep generated work in review until originality, print readiness, product fit and owner approval pass"
     ],
     "requiredEvidence": ["source-reference", "captured-at", "trend-summary", "target-audience", "target-product", "prompt-rationale", "originality-check", "saturation-assessment"]
+  },
+  "imageOptimiserPrintSizing": {
+    "physicalUnits": ["millimetres", "centimetres", "inches"],
+    "supportedIntentPresets": [
+      { "id": "fine-art-close-view", "targetDpi": 300 },
+      { "id": "photographic-print", "targetDpi": 240 },
+      { "id": "large-wall-art", "targetDpi": 150 }
+    ],
+    "calculation": "requiredPixelsPerEdge = physicalSizeInInches * targetDpi",
+    "referenceCases": [
+      { "widthMm": 1000, "heightMm": 1000, "targetDpi": 300, "requiredWidthPx": 11811, "requiredHeightPx": 11811, "approxMegapixels": 139.5 }
+    ],
+    "preflight": ["source-width-height", "source-effective-dpi-at-target-size", "required-upscale-factor", "provider-maximum-output", "estimated-provider-cost", "estimated-storage-size", "tier-quota-impact"],
+    "gates": [
+      "Show target dimensions, effective DPI, upscale factor and estimated cost before generation",
+      "Do not silently reduce DPI or physical dimensions",
+      "Do not start an upscale that exceeds the user's remaining plan allowance or configured per-job cost ceiling",
+      "Require explicit confirmation when a job crosses the configured high-cost or extreme-dimension threshold",
+      "Use tiled processing only when the provider cannot produce the required dimensions in one pass",
+      "Reject visible seams, hallucinated detail, sharpened halos, colour shifts and altered artwork"
+    ],
+    "defaultMode": "estimate-and-preview-only",
+    "productionExecution": "approval-gated"
   },
   "remediationRule": "Any failure or mismatch returns to the development workflow and requires new passing evidence before deployment approval"
 }

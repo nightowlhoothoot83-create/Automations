@@ -43,3 +43,10 @@ test('POD trend intelligence is current, attributable and originality gated', as
   assert.equal(contract.podTrendIntelligence.enabledByDefault, true); assert.equal(contract.podTrendIntelligence.firstGenerationChoice, 'trend-informed-original-concept');
   assert.ok(contract.podTrendIntelligence.requiredEvidence.includes('captured-at')); assert.ok(contract.podTrendIntelligence.rules.some((rule) => /protected/.test(rule)));
 });
+
+test('Image Optimiser protects large fine-art jobs with physical-size and cost preflight', async () => {
+  const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8')); const sizing = contract.imageOptimiserPrintSizing;
+  const metre = sizing.referenceCases.find((item) => item.widthMm === 1000 && item.heightMm === 1000 && item.targetDpi === 300);
+  assert.equal(metre.requiredWidthPx, 11811); assert.equal(metre.requiredHeightPx, 11811); assert.ok(metre.approxMegapixels > 139);
+  assert.equal(sizing.defaultMode, 'estimate-and-preview-only'); assert.equal(sizing.productionExecution, 'approval-gated'); assert.ok(sizing.preflight.includes('estimated-provider-cost')); assert.ok(sizing.preflight.includes('tier-quota-impact'));
+});

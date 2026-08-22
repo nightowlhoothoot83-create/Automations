@@ -9,10 +9,14 @@ if (!key) throw new Error('FAL_KEY is missing from .env.local');
 
 const prompt = process.env.COMPARISON_PROMPT || 'A print-on-demand T-shirt graphic of a fierce Australian wedge-tailed eagle in bold vintage screen-print style, centered symmetrical composition, limited palette of charcoal black, warm ochre and cream, crisp clean edges, strong silhouette, no mockup, no garment, no border, no watermark, no text, isolated artwork on a plain white background';
 const outputBaseName = process.env.COMPARISON_OUTPUT || 'flux-schnell';
+const endpointId = process.env.COMPARISON_ENDPOINT || 'fal-ai/flux-1/schnell';
 fal.config({ credentials: key });
 const startedAt = Date.now();
-const result = await fal.subscribe('fal-ai/flux-1/schnell', {
-  input: { prompt, image_size: 'square_hd', num_images: 1 },
+const input = endpointId.includes('flux-pro/')
+  ? { prompt, aspect_ratio: '1:1', num_images: 1, output_format: 'jpeg' }
+  : { prompt, image_size: 'square_hd', num_images: 1 };
+const result = await fal.subscribe(endpointId, {
+  input,
   logs: false,
 });
 const image = result.data?.images?.[0];
@@ -29,8 +33,8 @@ await writeFile(outputPath, Buffer.from(await response.arrayBuffer()));
 await writeFile(path.join(outputDir, `${outputBaseName}-result.json`), JSON.stringify({
   schemaVersion: '1.0.0',
   provider: 'fal.ai',
-  model: 'FLUX.1 Schnell',
-  endpointId: 'fal-ai/flux-1/schnell',
+  model: endpointId.includes('flux-pro/') ? 'FLUX Pro' : 'FLUX.1 Schnell',
+  endpointId,
   prompt,
   width: image.width ?? null,
   height: image.height ?? null,
