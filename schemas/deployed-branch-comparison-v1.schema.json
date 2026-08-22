@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/deployed-branch-comparison-v1.json",
+  "type": "object",
+  "required": ["schemaVersion", "enabled", "reviewBatchSize", "outputRoot", "viewports", "pages", "thresholds"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "enabled": { "type": "boolean" },
+    "reviewBatchSize": { "type": "integer", "minimum": 1, "maximum": 25 },
+    "outputRoot": { "type": "string" },
+    "viewports": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["id", "width", "height"] } },
+    "pages": { "type": "array", "items": { "type": "object", "required": ["id", "productionUrl", "branchPreviewUrl", "approved"] } },
+    "thresholds": { "type": "object", "required": ["pixelDifferenceRatio", "pixelColorDelta"] }
+  }
+}

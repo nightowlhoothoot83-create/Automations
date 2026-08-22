@@ -1,0 +1,9 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import { PNG } from 'pngjs';
+import { validateComparisonConfig, compareStructures, comparePngBuffers, batchChanges } from '../src/deployed-branch-compare.mjs';
+
+const png = (color) => { const image = new PNG({ width: 2, height: 2 }); for (let i = 0; i < image.data.length; i += 4) { image.data[i] = color[0]; image.data[i + 1] = color[1]; image.data[i + 2] = color[2]; image.data[i + 3] = 255; } return PNG.sync.write(image); };
+test('disabled candidate config validates without selecting a live target', () => assert.equal(validateComparisonConfig({ schemaVersion: '1.0.0', enabled: false, reviewBatchSize: 5, pages: [{ id: 'x', productionUrl: 'https://prod.invalid', branchPreviewUrl: 'https://branch.invalid', approved: false }], viewports: [{ id: 'desktop', width: 100, height: 100 }] }).enabled, false));
+test('enabled comparison refuses an unapproved page', () => assert.throws(() => validateComparisonConfig({ schemaVersion: '1.0.0', enabled: true, reviewBatchSize: 5, pages: [{ id: 'x', productionUrl: 'https://prod.invalid', branchPreviewUrl: 'https://branch.invalid', approved: false }], viewports: [{ id: 'desktop', width: 100, height: 100 }] }), /not approved/));
+test('identical screenshots are suppressed and changed pixels are detected', () => { assert.equal(comparePngBuffers(png([0, 0, 0]), png([0, 0, 0])).differentPixels, 0); assert.equal(comparePngBuffers(png([0, 0, 0]), png([255, 255, 255])).differentPixels, 4); });
+test('structure comparison returns only changed fields', () => assert.deepEqual(compareStructures({ title: 'A', wordCount: 10 }, { title: 'A', wordCount: 20 }), { wordCount: { production: 10, branch: 20 } }));
+test('changed comparisons are split into bounded owner-review batches', () => assert.deepEqual(batchChanges([1, 2, 3, 4, 5], 2).map((batch) => batch.items.length), [2, 2, 1]));

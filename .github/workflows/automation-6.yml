@@ -31,6 +31,8 @@ jobs:
         run: node src/policy-cli.mjs
       - name: Enforce visual verification gate against blocked fixture
         run: node src/visual-gate-cli.mjs --matrix fixtures/visual/known-failure.json || test $? -eq 1
+      - name: Validate deployed-versus-branch comparison without live capture
+        run: node src/deployed-branch-compare-cli.mjs
       - name: Run read-only checks
         run: node src/cli.mjs --config config/targets.example.json
       - name: Upload structured evidence

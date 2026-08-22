@@ -10,7 +10,15 @@
     "orchestrate": "node src/orchestrate.mjs --execute",
     "connections:check": "node src/connections-cli.mjs",
     "policy:check": "node src/policy-cli.mjs",
-    "visual:check": "node src/visual-gate-cli.mjs"
+    "visual:check": "node src/visual-gate-cli.mjs",
+    "compare:dry-run": "node src/deployed-branch-compare-cli.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "pixelmatch": "^7.2.0",
+    "playwright": "^1.62.1",
+    "pngjs": "^7.0.0"
+  }
 }

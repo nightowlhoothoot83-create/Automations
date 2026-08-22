@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0.0",
+  "enabled": false,
+  "reviewBatchSize": 5,
+  "outputRoot": "artifacts/comparisons",
+  "viewports": [
+    { "id": "desktop", "width": 1440, "height": 900 },
+    { "id": "mobile", "width": 390, "height": 844 }
+  ],
+  "pages": [
+    {
+      "id": "replace-with-approved-page",
+      "productionUrl": "https://production.example.invalid/",
+      "branchPreviewUrl": "https://branch-preview.example.invalid/",
+      "approved": false
+    }
+  ],
+  "thresholds": { "pixelDifferenceRatio": 0.001, "pixelColorDelta": 0.1 }
+}
