@@ -11,6 +11,29 @@
     "recordTrendEvidence": true,
     "rejectCopiedOrProtectedContent": true
   },
+  "stageBenchmarks": [
+    {
+      "id": "source-artwork-generation",
+      "input": "matched-text-prompt",
+      "providerCandidates": ["current-runware", "candidate-flux-schnell"],
+      "requiredOutput": "isolated-print-artwork",
+      "criteria": ["prompt-adherence", "originality", "composition", "visible-artifacts", "print-readiness", "effective-print-resolution", "transparency", "bleed-and-safe-area"]
+    },
+    {
+      "id": "product-preview-generation",
+      "input": "same-approved-source-artwork-and-product-template",
+      "providerCandidates": ["current-runware", "candidate-flux-schnell"],
+      "requiredOutput": "realistic-product-mockup",
+      "criteria": ["source-artwork-fidelity", "placement-accuracy", "scale-and-crop", "product-template-match", "fabric-or-surface-realism", "lighting-and-shadow", "colour-fidelity", "visible-artifacts"]
+    }
+  ],
+  "providerSelection": {
+    "selectPerStage": true,
+    "allowDifferentProvidersForArtworkAndPreview": true,
+    "artworkProvider": "pending-owner-review",
+    "previewProvider": "pending-owner-review",
+    "rule": "A provider must pass the evidence and owner-review gate for its assigned stage; success in one stage does not qualify it for the other"
+  },
   "providers": [
     { "id": "current-runware", "provider": "Runware", "model": null, "credentialEnv": "RUNWARE_API_KEY" },
     { "id": "candidate-flux-schnell", "provider": "fal.ai", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" }

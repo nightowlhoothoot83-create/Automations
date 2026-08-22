@@ -11,7 +11,13 @@
       "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null,
       "requiredChecks": ["product-preview-generation", "image-generation-output-quality", "provider-ab-same-prompt-analysis", "product-template-dimensions", "print-resolution", "print-format", "colour-profile", "transparency-when-required", "bleed-and-safe-area", "artifact-detection", "provider-migration-readiness", "save-and-reload-persistence"],
       "connectionsRequired": ["fal-key-environment-variable", "webhook-endpoint"],
-      "imageGenerationProvider": { "provider": "fal.ai", "clientPackage": "@fal-ai/client", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "credentialEnv": "FAL_KEY", "uses": ["artwork-generation", "preview-generation"], "replaces": "Runway where suitable" },
+      "providerArchitecture": {
+        "selectionMode": "independent-per-stage-after-benchmark",
+        "artworkGeneration": { "status": "pending-owner-review", "candidates": ["current Runware", "fal.ai FLUX.1 Schnell"] },
+        "previewGeneration": { "status": "pending-owner-review", "candidates": ["current Runware", "fal.ai FLUX.1 Schnell"] },
+        "allowDifferentProviders": true,
+        "falCandidate": { "clientPackage": "@fal-ai/client", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "credentialEnv": "FAL_KEY" }
+      },
       "suitabilityAnalysisProvider": { "provider": "Claude Vision", "use": "analyse image suitability for the selected POD product", "change": "none" }
     }
   ],
