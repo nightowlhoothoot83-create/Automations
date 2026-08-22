@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/hub-runs-v1.json",
+  "type": "object",
+  "required": ["schemaVersion", "updatedAt", "latestRunId", "runs"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "latestRunId": { "type": "string" },
+    "runs": { "type": "array", "items": { "type": "object", "required": ["runId", "status", "startedAt", "finishedAt", "summary", "reportPath"] } }
+  }
+}

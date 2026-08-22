@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { REPORT_SCHEMA_VERSION, validateConfig, checkTarget, runCommand, writeRun } from './core.mjs';
+import { REPORT_SCHEMA_VERSION, validateConfig, checkTarget, runCommand, writeRun, updateHubIndex } from './core.mjs';
 
 const args = process.argv.slice(2); const configPath = args[args.indexOf('--config') + 1] || 'config/targets.example.json';
 const config = validateConfig(JSON.parse(await readFile(configPath, 'utf8')));
@@ -9,12 +9,14 @@ const runId = `${startedAt.replace(/[:.]/g, '-')}-${process.pid}`;
 const results = [];
 for (const target of config.targets) results.push(...await checkTarget(target, config.defaults));
 for (const command of config.commands) results.push(await runCommand(command, process.cwd()));
-const summary = { passed: 0, warning: 0, failed: 0, skipped: 0 }; for (const item of results) summary[item.status]++;
 const approvals = [];
 const screenshotRequests = config.targets.filter((t) => t.screenshot?.enabled).map((t) => ({ targetId: t.id, url: t.url, viewport: t.screenshot.viewport, status: 'pending-renderer' }));
-if (screenshotRequests.length) approvals.push({ id: `screenshots-${runId}`, action: 'Connect an approved browser renderer', reason: 'The core runner records requests but does not install or execute a browser implicitly.', risk: 'low', status: 'pending' });
-const status = summary.failed ? 'failed' : summary.warning || approvals.length ? 'warning' : 'passed';
+for (const request of screenshotRequests) results.push({ id: request.targetId, kind: 'screenshot', status: 'skipped', startedAt, durationMs: 0, evidence: { reason: 'No renderer configured', request } });
+const summary = { passed: 0, warning: 0, failed: 0, skipped: 0 };
+for (const item of results) if (!(item.status in summary)) throw new Error(`Unknown result status: ${item.status}`); else summary[item.status]++;
+const status = summary.failed ? 'failed' : summary.warning ? 'warning' : 'passed';
 const report = { schemaVersion: REPORT_SCHEMA_VERSION, runId, startedAt, finishedAt: new Date().toISOString(), status, summary, results, approvals, source: { config: path.resolve(configPath), gitSha: process.env.GITHUB_SHA ?? null } };
 const dir = await writeRun(path.resolve('artifacts/runs'), report, screenshotRequests);
-console.log(JSON.stringify({ runId, status, summary, report: path.join(dir, 'report.json') }));
+const reportPath = path.join(dir, 'report.json'); const hubIndex = await updateHubIndex(path.resolve('artifacts/hub'), report, reportPath);
+console.log(JSON.stringify({ runId, status, summary, report: reportPath, hubIndex }));
 process.exitCode = summary.failed ? 1 : 0;

@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir, writeFile, appendFile } from 'node:fs/promises';
+import { mkdir, writeFile, appendFile, readFile, rename } from 'node:fs/promises';
 import path from 'node:path';
 
 export const REPORT_SCHEMA_VERSION = '1.0.0';
@@ -52,8 +52,10 @@ export async function checkTarget(target, defaults = {}) {
     if (target.checks.includes('health')) results.push(result(target.id, 'health', response.ok ? 'passed' : 'failed', startedAt, start, evidence));
     if (target.checks.includes('seo')) {
       const title = body.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim();
-      const description = body.match(/<meta\s+[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i)?.[1]?.trim();
-      const canonical = body.match(/<link\s+[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["']/i)?.[1];
+      const descriptionTag = body.match(/<meta\b[^>]*\bname=["']description["'][^>]*>/i)?.[0];
+      const canonicalTag = body.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/i)?.[0];
+      const description = attribute(descriptionTag, 'content')?.trim();
+      const canonical = attribute(canonicalTag, 'href');
       const missing = [!title && 'title', !description && 'meta description', !canonical && 'canonical'].filter(Boolean);
       results.push(result(target.id, 'seo', missing.length ? 'warning' : 'passed', startedAt, start, { ...evidence, title, description, canonical, missing }));
     }
@@ -70,6 +72,8 @@ export async function checkTarget(target, defaults = {}) {
 }
 
 function result(id, kind, status, startedAt, start, evidence) { return { id, kind, status, startedAt, durationMs: Math.round(performance.now() - start), evidence }; }
+
+function attribute(tag, name) { return tag?.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, 'i'))?.[1]; }
 
 export function runCommand(command, cwd) {
   const startedAt = new Date().toISOString(); const start = performance.now();
@@ -89,4 +93,17 @@ export async function writeRun(outputRoot, report, screenshotRequests = []) {
   await writeFile(path.join(dir, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
   if (screenshotRequests.length) await writeFile(path.join(dir, 'screenshot-requests.json'), `${JSON.stringify(screenshotRequests, null, 2)}\n`);
   return dir;
+}
+
+export async function updateHubIndex(hubRoot, report, reportPath, maxRuns = 100) {
+  await mkdir(hubRoot, { recursive: true });
+  const indexPath = path.join(hubRoot, 'runs-v1.json');
+  let previous = { schemaVersion: REPORT_SCHEMA_VERSION, updatedAt: report.finishedAt, runs: [] };
+  try { previous = JSON.parse(await readFile(indexPath, 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const entry = { runId: report.runId, status: report.status, startedAt: report.startedAt, finishedAt: report.finishedAt, summary: report.summary, reportPath };
+  const runs = [entry, ...previous.runs.filter((item) => item.runId !== report.runId)].slice(0, maxRuns);
+  const next = { schemaVersion: REPORT_SCHEMA_VERSION, updatedAt: report.finishedAt, latestRunId: report.runId, runs };
+  const temporary = `${indexPath}.${process.pid}.tmp`;
+  await writeFile(temporary, `${JSON.stringify(next, null, 2)}\n`); await rename(temporary, indexPath);
+  return indexPath;
 }

@@ -9,6 +9,7 @@ Automation 6 runs read-only health, SEO, link, repository, build, and regression
 ```powershell
 Copy-Item config/targets.example.json config/targets.local.json
 node src/cli.mjs --config config/targets.local.json
+node src/orchestrate.mjs
 node --test
 ```
 

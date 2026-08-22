@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "check": "node --test",
-    "automation:6": "node src/cli.mjs"
+    "automation:6": "node src/cli.mjs",
+    "orchestrate:dry-run": "node src/orchestrate.mjs",
+    "orchestrate": "node src/orchestrate.mjs --execute"
   },
   "engines": { "node": ">=20" }
 }

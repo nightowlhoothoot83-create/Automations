@@ -9,13 +9,15 @@ The repository began empty. It had no Git remote, GitHub Actions workflows, Clou
 - Read-only HTTP `GET`/`HEAD` monitoring is the default; no authenticated targets are in the example.
 - Build and regression commands use an executable plus argument array with `shell: false`; configuration cannot enable a shell.
 - Response bodies, link counts, command output, and execution time are bounded.
-- Deployment, remediation, repository writes, credential use, and browser installation are outside the runner.
-- A requested action that needs extra authority becomes a pending approval item instead of being executed.
+- Safe local and feature-branch infrastructure is autonomous. `config/permission-policy.json` is the shared coordination contract for Automations 1, 5, and 6.
+- Only material production actions listed in that contract become approval items. Missing optional local capabilities are recorded as `skipped`, not approvals.
 - Generated evidence is ignored by Git and contains no request/response headers or environment-variable values.
 
 ## Reporting contract
 
 `schemas/report-v1.schema.json` is the stable ingestion contract. Every report and JSONL event includes `schemaVersion: 1.0.0`; incompatible changes require a new schema version. Reports contain run timing, aggregate status, per-check evidence, and approval items. This is the boundary intended for future Management Hub ingestion.
+
+Each run atomically updates `artifacts/hub/runs-v1.json`, a bounded, deduplicated index described by `schemas/hub-runs-v1.schema.json`. `config/orchestration.json` registers Automation 6 and reserves disabled entries for Automations 1 and 5 so their status sources can be connected without changing the coordination contract.
 
 ## Check types
 

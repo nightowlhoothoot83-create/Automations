@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "automations": [
+    { "id": "automation-1", "enabled": false, "contract": "config/permission-policy.json", "statusSource": null },
+    { "id": "automation-5", "enabled": false, "contract": "config/permission-policy.json", "statusSource": null },
+    { "id": "automation-6", "enabled": true, "contract": "config/permission-policy.json", "command": ["node", "src/cli.mjs", "--config", "config/targets.example.json"], "statusSource": "artifacts/hub/runs-v1.json" }
+  ],
+  "defaults": { "overlapPolicy": "skip", "failurePolicy": "continue-independent", "retentionRuns": 100 }
+}
