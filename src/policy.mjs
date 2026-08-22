@@ -25,13 +25,15 @@ export function validateSchedules(manifest, inventory, workers) {
 
 export function validateSaasVerificationContract(contract) {
   if (contract?.schemaVersion !== '1.0.0' || contract.mode !== 'read-only' || !Array.isArray(contract.products)) throw new Error('Unsupported SaaS verification contract');
-  const required = ['public-frontend', 'pricing', 'advertised-claim-coverage', 'every-core-feature-workflow', 'api-calls', 'preview-or-rendering', 'save-and-reload-persistence', 'storage-read-write', 'backend-health', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];
+  const required = ['public-frontend', 'pricing', 'pricing-stripe-parity', 'advertised-claim-coverage', 'every-core-feature-workflow', 'api-calls', 'preview-or-rendering', 'save-and-reload-persistence', 'storage-read-write', 'backend-health', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];
   for (const surface of required) if (!contract.requiredSurfaces.includes(surface)) throw new Error(`Missing required SaaS surface: ${surface}`);
   for (const product of contract.products) {
     if (!product.id || new URL(product.publicUrl).protocol !== 'https:') throw new Error(`Invalid SaaS product: ${product.id}`);
     for (const key of ['backendHealthUrl', 'stripeTestUrl']) if (product[key] && new URL(product[key]).protocol !== 'https:') throw new Error(`${product.id}.${key} must use HTTPS`);
   }
   if (!/never complete a live charge/i.test(contract.stripeRule)) throw new Error('Stripe verification must forbid live charges');
+  for (const field of ['tier-name', 'amount', 'currency', 'billing-interval', 'trial', 'included-features-or-limits', 'checkout-destination']) if (!contract.pricingParityFields.includes(field)) throw new Error(`Missing pricing parity field: ${field}`);
+  if (!/requires new passing evidence/i.test(contract.remediationRule)) throw new Error('Remediation must require fresh passing evidence');
   return contract;
 }
 

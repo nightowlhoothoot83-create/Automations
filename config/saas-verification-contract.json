@@ -10,11 +10,13 @@
     { "id": "pod-automation", "publicUrl": "https://pod.raven-sharp.com/", "backendHealthUrl": null, "stripeTestUrl": null }
   ],
   "requiredSurfaces": [
-    "public-frontend", "core-product-information", "pricing", "authentication", "dashboard",
+    "public-frontend", "core-product-information", "pricing", "pricing-stripe-parity", "authentication", "dashboard",
     "advertised-claim-coverage", "every-core-feature-workflow", "api-calls", "preview-or-rendering", "results-or-output",
     "save-and-reload-persistence", "storage-read-write", "backend-health", "stripe-test-surface",
     "privacy", "terms", "contact-or-support", "header", "footer", "desktop", "mobile"
   ],
   "functionalRule": "Every advertised capability must map to passing evidence; a visual pass cannot override any claim, API, workflow, preview, save, persistence, storage, or backend failure",
-  "stripeRule": "Test mode or non-transactional inspection only; never complete a live charge"
+  "stripeRule": "Test mode or non-transactional inspection only; never complete a live charge",
+  "pricingParityFields": ["tier-name", "amount", "currency", "billing-interval", "trial", "included-features-or-limits", "checkout-destination"],
+  "remediationRule": "Any failure or mismatch returns to the development workflow and requires new passing evidence before deployment approval"
 }
