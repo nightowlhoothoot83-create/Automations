@@ -34,3 +34,7 @@ The CLI is scheduler-neutral so Windows Task Scheduler, GitHub Actions, or a Man
 All GitHub, Railway, Cloudflare, URL, workflow, monitoring, storage, logging, and Hub destinations are external configuration. `config/connections.example.json` contains disabled templates and environment-variable names only. `src/connections-cli.mjs` validates and reports readiness without contacting live services; `docs/connections-required.md` tracks verified discovery, gaps, and exact activation steps.
 
 Discovered systems remain `candidate` entries in `config/target-inventory.json`; target-selection validation refuses them until their state is explicitly changed to `approved`. `config/capability-map.json` describes the reusable handoff surface for Automations 1, 2, 5, and 6. Schedule, retention, and approval-routing contracts are separately versioned and validated by `src/policy-cli.mjs`; retention is dry-run by default and restricted to generated local artifact roots.
+
+## Visual verification gate
+
+`schemas/visual-verification-v1.schema.json` defines a per-page matrix containing the expected approved state, actual state, pass/fail result, issue, fix, screenshot/reference, and retest result for every item. A baseline approval item is created only when every required item has both an initial and retest pass and no item has a known issue or failure. The matrix must keep `baselineUpdatesEnabled` set to `false`; the CLI never writes a baseline and routes an eligible update as a pending Management Hub approval instead.

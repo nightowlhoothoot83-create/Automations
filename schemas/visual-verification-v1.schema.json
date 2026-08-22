@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/schemas/visual-verification-v1.json",
+  "type": "object",
+  "required": ["schemaVersion", "baselineUpdatesEnabled", "pages"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "baselineUpdatesEnabled": { "const": false },
+    "pages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pageId", "url", "items"],
+        "properties": {
+          "pageId": { "type": "string" }, "url": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "required", "expectedApprovedState", "actualState", "result", "issue", "fix", "screenshotReference", "retestResult"],
+              "properties": {
+                "id": { "type": "string" }, "required": { "type": "boolean" },
+                "expectedApprovedState": { "type": "string" }, "actualState": { "type": "string" },
+                "result": { "enum": ["pass", "fail"] }, "issue": { "type": ["string", "null"] },
+                "fix": { "type": ["string", "null"] }, "screenshotReference": { "type": "string" },
+                "retestResult": { "enum": ["pass", "fail", "not-run"] }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

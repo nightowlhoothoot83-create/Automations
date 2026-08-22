@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "baselineUpdatesEnabled": false,
+  "pages": [{
+    "pageId": "fixture-home", "url": "http://127.0.0.1/fixture-home",
+    "items": [
+      { "id": "desktop-layout", "required": true, "expectedApprovedState": "Header, content, and footer match the approved composition", "actualState": "Matches expected composition", "result": "pass", "issue": null, "fix": null, "screenshotReference": "fixtures/references/fixture-home-desktop.png", "retestResult": "pass" },
+      { "id": "mobile-overflow", "required": true, "expectedApprovedState": "No horizontal overflow at 390px", "actualState": "No overflow observed", "result": "pass", "issue": null, "fix": null, "screenshotReference": "fixtures/references/fixture-home-mobile.png", "retestResult": "pass" }
+    ]
+  }]
+}

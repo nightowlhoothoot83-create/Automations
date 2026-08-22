@@ -1,0 +1,10 @@
+import { readFile, mkdir, writeFile } from 'node:fs/promises'; import path from 'node:path';
+import { evaluateVisualMatrix, createBaselineApproval } from './visual-gate.mjs'; import { routeApproval } from './policy.mjs';
+const args = process.argv.slice(2); const matrixPath = args[args.indexOf('--matrix') + 1] || 'fixtures/visual/known-failure.json';
+const matrix = JSON.parse(await readFile(matrixPath, 'utf8')); const evaluation = evaluateVisualMatrix(matrix);
+const approval = createBaselineApproval(matrix, evaluation, path.resolve(matrixPath));
+let approvalDestination = null; if (approval) approvalDestination = await routeApproval(approval, JSON.parse(await readFile('config/approval-routes.json', 'utf8')));
+const report = { schemaVersion: '1.0.0', generatedAt: new Date().toISOString(), matrixPath: path.resolve(matrixPath), baselineUpdatePerformed: false, evaluation, approval, approvalDestination };
+await mkdir('artifacts/hub', { recursive: true }); await writeFile('artifacts/hub/visual-verification-v1.json', `${JSON.stringify(report, null, 2)}\n`);
+console.log(JSON.stringify(report, null, 2));
+process.exitCode = evaluation.knownFailureCount ? 1 : 0;

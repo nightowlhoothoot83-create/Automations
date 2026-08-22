@@ -9,7 +9,8 @@
     "orchestrate:dry-run": "node src/orchestrate.mjs",
     "orchestrate": "node src/orchestrate.mjs --execute",
     "connections:check": "node src/connections-cli.mjs",
-    "policy:check": "node src/policy-cli.mjs"
+    "policy:check": "node src/policy-cli.mjs",
+    "visual:check": "node src/visual-gate-cli.mjs"
   },
   "engines": { "node": ">=20" }
 }
