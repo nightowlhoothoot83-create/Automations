@@ -11,9 +11,10 @@
   ],
   "requiredSurfaces": [
     "public-frontend", "core-product-information", "pricing", "authentication", "dashboard",
-    "every-core-feature-workflow", "results-or-output", "backend-health", "stripe-test-surface",
+    "every-core-feature-workflow", "api-calls", "preview-or-rendering", "results-or-output",
+    "save-and-reload-persistence", "storage-read-write", "backend-health", "stripe-test-surface",
     "privacy", "terms", "contact-or-support", "header", "footer", "desktop", "mobile"
   ],
-  "functionalRule": "A visual pass cannot override a functional failure",
+  "functionalRule": "A visual pass cannot override any API, workflow, preview, save, persistence, storage, or backend failure",
   "stripeRule": "Test mode or non-transactional inspection only; never complete a live charge"
 }

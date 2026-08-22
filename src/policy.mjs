@@ -25,7 +25,7 @@ export function validateSchedules(manifest, inventory, workers) {
 
 export function validateSaasVerificationContract(contract) {
   if (contract?.schemaVersion !== '1.0.0' || contract.mode !== 'read-only' || !Array.isArray(contract.products)) throw new Error('Unsupported SaaS verification contract');
-  const required = ['public-frontend', 'pricing', 'every-core-feature-workflow', 'backend-health', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];
+  const required = ['public-frontend', 'pricing', 'every-core-feature-workflow', 'api-calls', 'preview-or-rendering', 'save-and-reload-persistence', 'storage-read-write', 'backend-health', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];
   for (const surface of required) if (!contract.requiredSurfaces.includes(surface)) throw new Error(`Missing required SaaS surface: ${surface}`);
   for (const product of contract.products) {
     if (!product.id || new URL(product.publicUrl).protocol !== 'https:') throw new Error(`Invalid SaaS product: ${product.id}`);
