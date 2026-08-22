@@ -28,3 +28,9 @@ test('six-product SaaS contract requires visual, functional, legal, backend and 
   const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8'));
   assert.equal(validateSaasVerificationContract(contract).products.length, 6); assert.equal(contract.mode, 'read-only');
 });
+
+test('POD provider benchmark is disabled and uses matched blind analysis', async () => {
+  const benchmark = JSON.parse(await readFile('config/pod-provider-ab-test.example.json', 'utf8'));
+  assert.equal(benchmark.enabled, false); assert.equal(benchmark.providers.length, 2); assert.equal(benchmark.analysis.blindProviderLabels, true);
+  assert.ok(benchmark.providers.some((provider) => provider.credentialEnv === 'FAL_KEY')); assert.match(benchmark.selectionRule, /owner review/);
+});

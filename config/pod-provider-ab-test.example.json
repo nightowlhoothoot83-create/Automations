@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "enabled": false,
+  "sampleCountPerPrompt": 4,
+  "prompts": [],
+  "targetProductTemplates": [],
+  "providers": [
+    { "id": "current-runware", "provider": "Runware", "model": null, "credentialEnv": "RUNWARE_API_KEY" },
+    { "id": "candidate-flux-schnell", "provider": "fal.ai", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" }
+  ],
+  "analysis": {
+    "provider": "Claude Vision",
+    "blindProviderLabels": true,
+    "criteria": ["prompt-adherence", "composition", "text-quality", "visible-artifacts", "product-fit", "preview-quality", "template-dimensions", "effective-print-resolution", "transparency", "bleed-and-safe-area"],
+    "operationalMetrics": ["latency", "cost-per-output", "failure-rate"]
+  },
+  "selectionRule": "No provider switch until the candidate passes print-readiness and owner review"
+}
