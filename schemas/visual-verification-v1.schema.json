@@ -2,10 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.invalid/schemas/visual-verification-v1.json",
   "type": "object",
-  "required": ["schemaVersion", "evidenceClass", "baselineUpdatesEnabled", "pages"],
+  "required": ["schemaVersion", "evidenceClass", "maxEvidenceAgeHours", "baselineUpdatesEnabled", "pages"],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
     "evidenceClass": { "enum": ["test-fixture", "live-site"] },
+    "maxEvidenceAgeHours": { "type": "integer", "minimum": 1, "maximum": 168 },
     "baselineUpdatesEnabled": { "const": false },
     "pages": {
       "type": "array",

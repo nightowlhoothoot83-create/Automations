@@ -1,6 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "evidenceClass": "test-fixture",
+  "maxEvidenceAgeHours": 24,
   "baselineUpdatesEnabled": false,
   "pages": [{
     "pageId": "fixture-home", "url": "http://127.0.0.1/fixture-home",

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "evidenceClass": "live-site",
+  "maxEvidenceAgeHours": 24,
+  "baselineUpdatesEnabled": false,
+  "pages": [{
+    "pageId": "replace-with-approved-page-id",
+    "url": "https://replace-with-approved-target.invalid/",
+    "items": [{
+      "id": "desktop-layout",
+      "required": true,
+      "expectedApprovedState": "Replace with the approved expected state",
+      "actualState": "Not yet captured",
+      "result": "fail",
+      "issue": "Awaiting current live screenshot evidence",
+      "fix": null,
+      "screenshotReference": "pending://not-captured",
+      "capturedAt": null,
+      "retestResult": "not-run"
+    }]
+  }]
+}

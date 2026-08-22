@@ -11,8 +11,16 @@ test('passing test fixtures validate the mechanism but never permit a baseline a
 test('complete live evidence can only create a pending approval, never update a baseline', async () => {
   const matrix = await fixture('all-pass'); matrix.evidenceClass = 'live-site';
   for (const page of matrix.pages) for (const item of page.items) item.capturedAt = '2026-08-22T00:00:00.000Z';
-  const evaluation = evaluateVisualMatrix(matrix); assert.equal(evaluation.eligibleForBaselineApproval, true); assert.equal(evaluation.liveEvidenceCount, 2);
+  const evaluation = evaluateVisualMatrix(matrix, { now: Date.parse('2026-08-22T01:00:00.000Z') }); assert.equal(evaluation.eligibleForBaselineApproval, true); assert.equal(evaluation.liveEvidenceCount, 2);
   assert.equal(createBaselineApproval(matrix, evaluation, 'simulated-live-evidence').status, 'pending');
+});
+
+test('stale or future live captures are not current evidence', async () => {
+  const matrix = await fixture('all-pass'); matrix.evidenceClass = 'live-site';
+  for (const page of matrix.pages) for (const item of page.items) item.capturedAt = '2026-08-20T00:00:00.000Z';
+  assert.equal(evaluateVisualMatrix(matrix, { now: Date.parse('2026-08-22T00:00:00.000Z') }).eligibleForBaselineApproval, false);
+  for (const page of matrix.pages) for (const item of page.items) item.capturedAt = '2026-08-23T00:00:00.000Z';
+  assert.equal(evaluateVisualMatrix(matrix, { now: Date.parse('2026-08-22T00:00:00.000Z') }).eligibleForBaselineApproval, false);
 });
 
 test('live pass without captured evidence remains baseline-ineligible', async () => {

@@ -1,6 +1,7 @@
-export function evaluateVisualMatrix(matrix) {
+export function evaluateVisualMatrix(matrix, { now = Date.now() } = {}) {
   if (matrix?.schemaVersion !== '1.0.0' || !Array.isArray(matrix.pages)) throw new Error('Unsupported visual verification matrix');
   if (!['test-fixture', 'live-site'].includes(matrix.evidenceClass)) throw new Error('Visual matrix requires an explicit evidenceClass');
+  if (!Number.isInteger(matrix.maxEvidenceAgeHours) || matrix.maxEvidenceAgeHours < 1 || matrix.maxEvidenceAgeHours > 168) throw new Error('Visual matrix requires maxEvidenceAgeHours between 1 and 168');
   if (matrix.baselineUpdatesEnabled !== false) throw new Error('Baseline updates must remain disabled in the verification matrix');
   const results = []; const ids = new Set();
   for (const page of matrix.pages) {
@@ -10,9 +11,11 @@ export function evaluateVisualMatrix(matrix) {
       for (const field of ['expectedApprovedState', 'actualState', 'result', 'screenshotReference', 'retestResult']) if (!item[field]) throw new Error(`${key} requires ${field}`);
       if (!['pass', 'fail'].includes(item.result) || !['pass', 'fail', 'not-run'].includes(item.retestResult)) throw new Error(`${key} has invalid result`);
       const knownFailure = item.result === 'fail' || item.retestResult === 'fail' || Boolean(item.issue);
-      const hasLiveEvidence = matrix.evidenceClass === 'live-site' && Boolean(item.screenshotReference) && Boolean(item.capturedAt) && !Number.isNaN(Date.parse(item.capturedAt));
+      const captureTime = Date.parse(item.capturedAt); const evidenceAgeMs = now - captureTime;
+      const currentEvidence = !Number.isNaN(captureTime) && evidenceAgeMs >= 0 && evidenceAgeMs <= matrix.maxEvidenceAgeHours * 3600000;
+      const hasLiveEvidence = matrix.evidenceClass === 'live-site' && Boolean(item.screenshotReference) && currentEvidence;
       const verifiedPass = item.result === 'pass' && item.retestResult === 'pass' && !item.issue;
-      results.push({ pageId: page.pageId, itemId: item.id, required: item.required, verifiedPass, knownFailure, hasLiveEvidence });
+      results.push({ pageId: page.pageId, itemId: item.id, required: item.required, verifiedPass, knownFailure, hasLiveEvidence, currentEvidence });
     }
   }
   const required = results.filter((item) => item.required);
