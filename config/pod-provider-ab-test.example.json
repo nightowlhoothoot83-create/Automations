@@ -14,5 +14,14 @@
     "criteria": ["prompt-adherence", "composition", "text-quality", "visible-artifacts", "product-fit", "preview-quality", "template-dimensions", "effective-print-resolution", "transparency", "bleed-and-safe-area"],
     "operationalMetrics": ["latency", "cost-per-output", "failure-rate"]
   },
+  "ownerReviewPresentation": {
+    "showPrompt": true,
+    "showRawRunwareOutput": true,
+    "showRawFluxOutput": true,
+    "createSideBySideImage": true,
+    "labelProviderOutputs": true,
+    "groupByPromptAndProduct": true,
+    "batchSize": 4
+  },
   "selectionRule": "No provider switch until the candidate passes print-readiness and owner review"
 }
