@@ -3,6 +3,8 @@ node_modules/
 artifacts/
 data/hub/*.json
 data/hub/*.jsonl
+data/hub/archives/
+data/hub/exports/
 !data/hub/.gitkeep
 coverage/
 

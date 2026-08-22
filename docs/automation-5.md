@@ -22,6 +22,10 @@ The checked-in `fixtures/hub/` records make each module testable without credent
 
 Owner decisions append v1 events to ignored `data/hub/activity-v1.jsonl` and update the local current-state index. The dashboard shows event ID, actor, timestamp, decision, and provenance. Malformed journal lines are skipped with visible warnings, preserving valid history. `HUB_HISTORY_PATH` supports isolated local testing and future storage adapters.
 
+History export produces a portable `ascension-hub-history-export` v1 bundle. Import validates every event, preserves original IDs and provenance, and skips duplicates. Retention never silently discards history: older records are written to ignored `data/hub/archives/` before the active JSONL journal is compacted. `HUB_HISTORY_ARCHIVE_DIR` supports isolated storage.
+
+The worker drill-down API (`/api/workers/:id/runs`) follows the configured adapter: report-file sources expose one run, while Automation 6 hub indexes expose every retained run and its unchanged evidence. Missing artifacts return an explicit degraded state. No drill-down action invokes a worker or live system.
+
 ## Current boundaries and decision points
 
 - When `artifacts/hub/runs-v1.json` is absent, the dashboard enters a prominent demonstration mode. Sample data is never represented as a live run.
