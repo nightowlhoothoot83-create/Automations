@@ -37,7 +37,8 @@ export function validateSaasVerificationContract(contract) {
   const print = contract.podPrintReadiness;
   if (print?.targetDpi !== 300 || print.dimensionsSource !== 'selected-product-provider-template' || !print.requireBleedAndSafeAreaValidation || !print.rejectLowResolutionOrVisibleArtifacts || !/DPI metadata alone is insufficient/i.test(print.rule)) throw new Error('POD print-readiness contract is incomplete');
   const pod = contract.products.find((product) => product.id === 'pod-automation');
-  if (pod?.imageGenerationProvider?.provider !== 'fal.ai' || pod.imageGenerationProvider.model !== 'FLUX.1 Schnell' || pod.imageGenerationProvider.credentialEnv !== 'FAL_KEY') throw new Error('POD fal.ai FLUX.1 Schnell provider configuration is incomplete');
+  if (pod?.imageGenerationProvider?.provider !== 'fal.ai' || pod.imageGenerationProvider.model !== 'FLUX.1 Schnell' || pod.imageGenerationProvider.endpointId !== 'fal-ai/flux-1/schnell' || pod.imageGenerationProvider.credentialEnv !== 'FAL_KEY' || !pod.imageGenerationProvider.uses.includes('preview-generation')) throw new Error('POD fal.ai FLUX.1 Schnell provider configuration is incomplete');
+  if (pod.suitabilityAnalysisProvider?.provider !== 'Claude Vision' || pod.suitabilityAnalysisProvider.change !== 'none') throw new Error('POD Claude Vision suitability analysis must remain unchanged');
   return contract;
 }
 
