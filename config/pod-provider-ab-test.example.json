@@ -21,10 +21,13 @@
     },
     {
       "id": "product-preview-generation",
-      "input": "same-approved-source-artwork-and-product-template",
+      "input": "binary-identical-approved-source-artwork-and-same-product-template-placement-scale-background",
       "providerCandidates": ["current-runware", "candidate-flux-schnell"],
       "requiredOutput": "realistic-product-mockup",
-      "criteria": ["source-artwork-fidelity", "placement-accuracy", "scale-and-crop", "product-template-match", "fabric-or-surface-realism", "lighting-and-shadow", "colour-fidelity", "visible-artifacts"]
+      "criteria": ["source-artwork-pixel-preservation", "placement-accuracy", "scale-and-crop", "product-template-match", "fabric-or-surface-realism", "lighting-and-shadow", "colour-fidelity", "visible-artifacts"],
+      "automaticFailure": ["source-artwork-redrawn", "source-artwork-restyled", "subject-or-detail-changed", "different-product-template-or-placement"],
+      "preferredMethod": "deterministic-provider-mockup-api-or-template-compositing",
+      "generativeImageToImageRole": "experimental-only-unless-pixel-preservation-passes"
     }
   ],
   "providerSelection": {

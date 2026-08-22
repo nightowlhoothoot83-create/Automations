@@ -35,7 +35,7 @@ test('POD provider benchmark is disabled and uses matched blind analysis', async
   assert.ok(benchmark.providers.some((provider) => provider.credentialEnv === 'FAL_KEY')); assert.equal(benchmark.ownerReviewPresentation.createSideBySideImage, true); assert.equal(benchmark.ownerReviewPresentation.showRawRunwareOutput, true); assert.equal(benchmark.ownerReviewPresentation.showRawFluxOutput, true); assert.match(benchmark.selectionRule, /owner review/);
   assert.equal(benchmark.promptStrategy.primary, 'trend-informed-original-concept'); assert.equal(benchmark.promptStrategy.includeEvergreenControl, true); assert.equal(benchmark.promptStrategy.rejectCopiedOrProtectedContent, true);
   assert.equal(benchmark.stageBenchmarks.length, 2); assert.equal(benchmark.providerSelection.selectPerStage, true); assert.equal(benchmark.providerSelection.allowDifferentProvidersForArtworkAndPreview, true);
-  assert.equal(benchmark.stageBenchmarks.find((stage) => stage.id === 'product-preview-generation').input, 'same-approved-source-artwork-and-product-template');
+  const preview = benchmark.stageBenchmarks.find((stage) => stage.id === 'product-preview-generation'); assert.match(preview.input, /binary-identical/); assert.equal(preview.preferredMethod, 'deterministic-provider-mockup-api-or-template-compositing'); assert.ok(preview.automaticFailure.includes('source-artwork-redrawn'));
 });
 
 test('POD trend intelligence is current, attributable and originality gated', async () => {
