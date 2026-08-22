@@ -49,4 +49,5 @@ test('Image Optimiser protects large fine-art jobs with physical-size and cost p
   const metre = sizing.referenceCases.find((item) => item.widthMm === 1000 && item.heightMm === 1000 && item.targetDpi === 300);
   assert.equal(metre.requiredWidthPx, 11811); assert.equal(metre.requiredHeightPx, 11811); assert.ok(metre.approxMegapixels > 139);
   assert.equal(sizing.defaultMode, 'estimate-and-preview-only'); assert.equal(sizing.productionExecution, 'approval-gated'); assert.ok(sizing.preflight.includes('estimated-provider-cost')); assert.ok(sizing.preflight.includes('tier-quota-impact'));
+  const economics = contract.imageOptimiserUnitEconomics; assert.equal(economics.status, 'requires-tier-remediation-and-owner-review'); assert.equal(economics.verifiedProviderPricing.usdPerSuccessfulOutput, 0.002); assert.equal(economics.proposedMeter.unit, 'weighted-output-megapixel-credit'); assert.ok(economics.requiredAudit.includes('worst-case-usage'));
 });

@@ -84,5 +84,31 @@
     "defaultMode": "estimate-and-preview-only",
     "productionExecution": "approval-gated"
   },
+  "imageOptimiserUnitEconomics": {
+    "status": "requires-tier-remediation-and-owner-review",
+    "billingCurrency": "AUD",
+    "verifiedProviderPricing": { "provider": "Replicate", "model": "nightmareai/real-esrgan", "usdPerSuccessfulOutput": 0.002, "source": "official-provider-pricing" },
+    "currentlyAdvertisedTiers": [
+      { "id": "free", "monthlyAud": 0, "advertisedImages": 5, "batchSize": 1 },
+      { "id": "standard", "monthlyAud": 10, "advertisedImages": 100, "batchSize": 10 },
+      { "id": "pro", "monthlyAud": 15, "advertisedImages": 3000, "batchSize": 50 }
+    ],
+    "risk": "A flat image count treats a small web image and a multi-pass 140-megapixel fine-art output as equal, exposing the plan to storage, egress, memory, retry and tiled-processing cost blowouts",
+    "proposedMeter": {
+      "unit": "weighted-output-megapixel-credit",
+      "standardOutputMegapixelsPerCredit": 25,
+      "formula": "credits = ceil(outputMegapixels / 25) * upscalePassCount * featureMultipliers",
+      "featureMultipliers": { "faceEnhancement": 1.5, "tiledProcessing": 1.25, "losslessLargeFile": 1.25 },
+      "minimumCreditsPerJob": 1
+    },
+    "requiredAudit": ["provider-inference", "storage", "egress", "temporary-files", "retry-rate", "payment-fees", "support-overhead", "gross-margin-by-tier", "worst-case-usage"],
+    "rules": [
+      "Do not promise a raw image count until every tier passes worst-case and expected-use margin tests",
+      "Show the credit estimate before upload or processing",
+      "Deduct credits from calculated output work rather than input file count",
+      "Reject or separately price jobs that exceed plan, job-cost or extreme-dimension ceilings",
+      "Do not activate revised entitlements or pricing without owner approval"
+    ]
+  },
   "remediationRule": "Any failure or mismatch returns to the development workflow and requires new passing evidence before deployment approval"
 }
