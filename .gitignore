@@ -1,0 +1,16 @@
+# Dependencies and generated output
+node_modules/
+artifacts/
+coverage/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
