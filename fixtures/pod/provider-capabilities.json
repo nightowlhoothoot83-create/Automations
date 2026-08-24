@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixtureOnly": true,
+  "providers": [
+    {
+      "id": "fixture-direct-connect",
+      "capabilityVersion": "fixture-1",
+      "connectionMode": "direct-connect",
+      "builtInUpscaling": { "verified": false, "countsAsPrintReadiness": false },
+      "products": [
+        { "id": "mug", "variant": "standard", "printWidthIn": 8.5, "printHeightIn": 3.5, "targetDpi": 300, "format": "PNG", "colourProfile": "sRGB", "transparency": "supported" },
+        { "id": "shirt", "variant": "adult-front", "printWidthIn": 15, "printHeightIn": 18, "targetDpi": 300, "format": "PNG", "colourProfile": "sRGB", "transparency": "required" }
+      ]
+    },
+    {
+      "id": "fixture-csv-export",
+      "capabilityVersion": "fixture-1",
+      "connectionMode": "csv-export",
+      "builtInUpscaling": { "verified": true, "countsAsPrintReadiness": false },
+      "products": [
+        { "id": "poster", "variant": "large", "printWidthIn": 24, "printHeightIn": 36, "targetDpi": 300, "format": "JPEG", "colourProfile": "sRGB", "transparency": "not-supported" }
+      ]
+    }
+  ]
+}

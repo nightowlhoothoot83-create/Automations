@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "branch-only-dry-run",
+  "currency": "USD",
+  "targetGrossMargin": 0.65,
+  "creditMeter": {
+    "name": "pod-production-credit",
+    "costUsdPerCredit": 0.01,
+    "minimumCreditsPerOperation": 1,
+    "rounding": "ceiling",
+    "includedCostDrivers": [
+      "artwork-generation",
+      "suitability-analysis",
+      "background-processing",
+      "upscale-or-tiling",
+      "storage-and-egress",
+      "provider-operation",
+      "expected-retries",
+      "payment-overhead"
+    ],
+    "formula": "credits = ceil(totalExpectedCostUsd / (costUsdPerCredit * (1 - targetGrossMargin)))"
+  },
+  "masterArtwork": {
+    "strategy": "upscale-once-to-largest-selected-provider-requirement",
+    "deriveSmallerOutputsWithoutRedesign": true,
+    "deduplicateBySourceSha256": true,
+    "neverChargeDuplicateProcessing": true
+  },
+  "draftGate": {
+    "status": "approval-gated",
+    "requiredEvidence": [
+      "source-artwork-sha256",
+      "final-artwork-sha256",
+      "provider-capability-version",
+      "product-and-variant",
+      "required-pixel-dimensions",
+      "effective-dpi",
+      "format-and-colour-profile",
+      "transparency-or-background-choice",
+      "bleed-and-safe-area",
+      "placement-and-scale",
+      "artifact-check",
+      "provider-upload-acceptance",
+      "credit-preflight"
+    ],
+    "rules": [
+      "The exact final artwork attached to the draft must pass every selected provider requirement",
+      "The mockup must reference the binary-identical final artwork and may not redraw or restyle it",
+      "Provider-supplied upscaling may only be credited after capability verification and upload acceptance",
+      "No draft, baseline, provider switch, price change or deployment is approved automatically"
+    ]
+  }
+}
