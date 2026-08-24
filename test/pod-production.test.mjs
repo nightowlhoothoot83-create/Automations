@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { requiredPixels, planMasterArtwork, calculateProductionCredits, validateDeterministicMockup, validateDraftEligibility } from '../src/pod-production.mjs';
+import { requiredPixels, planMasterArtwork, calculateProductionCredits, validateDeterministicMockup, validateDraftEligibility, buildPodHubRun } from '../src/pod-production.mjs';
 
 test('POD dimensions come from the selected provider product rather than DPI metadata', async () => {
   const fixtures = JSON.parse(await readFile('fixtures/pod/provider-capabilities.json', 'utf8'));
@@ -31,4 +31,14 @@ test('complete POD draft evidence remains pending owner approval and can never a
   assert.deepEqual(validateDraftEligibility(complete, contract.draftGate.requiredEvidence), { eligible: false, status: 'pending-owner-approval', missing: [] });
   const blocked = validateDraftEligibility({ ...complete, 'provider-upload-acceptance': false }, contract.draftGate.requiredEvidence);
   assert.equal(blocked.status, 'blocked'); assert.deepEqual(blocked.missing, ['provider-upload-acceptance']);
+});
+
+test('POD preflight produces a versioned Management Hub run without auto-approval', async () => {
+  const fixtures = JSON.parse(await readFile('fixtures/pod/provider-capabilities.json', 'utf8'));
+  const products = fixtures.providers[0].products; const masterPlan = planMasterArtwork(products);
+  const draftResult = { eligible: false, status: 'pending-owner-approval', missing: [] };
+  const run = buildPodHubRun({ runId: 'pod-fixture-1', startedAt: '2026-08-25T00:00:00.000Z', finishedAt: '2026-08-25T00:00:01.000Z', products, masterPlan, creditPlan: { credits: 25 }, draftResult, evidence: { fixtureOnly: true } });
+  assert.equal(run.schemaVersion, '1.0.0'); assert.equal(run.automationId, 'automation-6-pod-production'); assert.equal(run.status, 'pending-owner-approval');
+  assert.equal(run.approval.required, true); assert.equal(run.approval.status, 'pending'); assert.equal(run.summary.selectedProducts.length, 2);
+  assert.throws(() => buildPodHubRun({ runId: 'bad', startedAt: 'x', finishedAt: 'y', products, masterPlan, creditPlan: { credits: 1 }, draftResult: { status: 'approved', missing: [] } }), /cannot auto-approve/);
 });

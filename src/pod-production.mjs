@@ -38,3 +38,20 @@ export function validateDraftEligibility(evidence, requiredEvidence) {
   if (missing.length) return { eligible: false, status: 'blocked', missing };
   return { eligible: false, status: 'pending-owner-approval', missing: [] };
 }
+
+export function buildPodHubRun({ runId, startedAt, finishedAt, products, masterPlan, creditPlan, draftResult, evidence }) {
+  if (!runId || !startedAt || !finishedAt || !Array.isArray(products) || !masterPlan || !creditPlan || !draftResult) throw new Error('Incomplete POD Hub run');
+  if (!['blocked', 'pending-owner-approval'].includes(draftResult.status)) throw new Error('POD Hub status cannot auto-approve');
+  return {
+    schemaVersion: '1.0.0', runId, automationId: 'automation-6-pod-production', status: draftResult.status, startedAt, finishedAt,
+    summary: {
+      selectedProducts: products.map((item) => `${item.id}:${item.variant}`),
+      masterWidthPx: masterPlan.width,
+      masterHeightPx: masterPlan.height,
+      estimatedCredits: creditPlan.credits,
+      missingEvidenceCount: draftResult.missing.length
+    },
+    evidence,
+    approval: { required: true, status: 'pending', actionClass: 'pod-product-draft-approval' }
+  };
+}

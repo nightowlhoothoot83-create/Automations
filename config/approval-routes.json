@@ -2,6 +2,6 @@
   "schemaVersion": "1.0.0",
   "defaultRoute": "management-hub",
   "routes": [
-    { "id": "management-hub", "destination": "artifacts/hub/approvals-v1.json", "actionClasses": ["merge-to-main-or-production", "live-cloudflare-deployment", "production-dns-change", "production-secret-or-credential-change", "production-resource-or-data-deletion", "enable-live-production-mutation", "irreversible-production-infrastructure-change", "visual-baseline-update"] }
+    { "id": "management-hub", "destination": "artifacts/hub/approvals-v1.json", "actionClasses": ["merge-to-main-or-production", "live-cloudflare-deployment", "production-dns-change", "production-secret-or-credential-change", "production-resource-or-data-deletion", "enable-live-production-mutation", "irreversible-production-infrastructure-change", "visual-baseline-update", "pod-product-draft-approval"] }
   ]
 }
