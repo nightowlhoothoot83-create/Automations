@@ -12,9 +12,9 @@ Read-only production checks and local repository builds were run for Image Optim
 |---|---|---|
 | Image Optimiser & Upscaler | Pass with coverage warning | Production build passes; API root and detailed health return 200 JSON; MongoDB, Runware, and Stripe report healthy; unauthenticated `/api/auth/me` returns 401. Paid generation, download, and owner session remain unproved. |
 | POD suite | Pass with expected blocker | Production build passes; API root, root health, and detailed health return 200 JSON; unauthenticated auth gate returns 401. Detailed health reports Gemini `not_configured` while Runware, Claude, Stripe, MongoDB, and R2 are healthy. The missing Print-on-Demand Railway/platform credential remains an expected blocker for provider publishing; no key was requested or changed. |
-| Ad Manager | Pass with documentation warning | Four repository smoke tests pass; backend compiles; `/api/health` returns 200 JSON; auth gate returns 401. README claims auth/webhooks are unimplemented although source and smoke tests show both route families, so deployment documentation is stale. |
+| Ad Manager | Pass; documentation fix ready | Five repository smoke tests pass; backend compiles; `/api/health` returns 200 JSON; auth gate returns 401. The obsolete Express/in-memory README was corrected on isolated branch `codex/automation-1-ad-docs` at `c5002d4`; no deployment was performed. |
 | Book Creator | Pass with coverage warning | Backend compiles; API root returns 200 JSON; auth gate returns 401; public page renders without captured console errors or desktop overflow. Authenticated creation, generation, export, download, and video handoff remain unproved. |
-| Content Creator | Pass with naming warning | Backend compiles; API root returns 200 JSON; auth gate returns 401; public page renders without captured console errors or desktop overflow. API identifies itself as `Raven Sharp Video Creator API`, inconsistent with the current Content Creator product name. Authenticated generation/download remains unproved. |
+| Content Creator | Pass; identity fix ready | Backend compiles; API root returns 200 JSON; auth gate returns 401; public page renders without captured console errors or desktop overflow. API, startup log and password-reset copy now use `Raven Sharp Content Creator` on isolated branch `codex/automation-1-content-api-identity` at `e071085`; 2/2 identity regression tests pass. Authenticated generation/download remains unproved. |
 | Smart Cleaner web SaaS | Pass as marketing web surface | Public page returns 200 and renders without captured console errors or desktop overflow. Repository contains a static marketing/demo surface, not a functional connected-drive cleaner backend. Smart Cleaner app was kept out of scope. |
 | RavenSharp.com hub | Warning | HTTP probe returns 200 with Raven Sharp content. The in-app browser twice returned `ERR_NAME_NOT_RESOLVED`, while the same machine's direct HTTPS request succeeded; treat as a browser/runtime DNS warning until reproduced externally. |
 
@@ -30,6 +30,16 @@ Read-only production checks and local repository builds were run for Image Optim
 
 `automation-1/smoke.mjs` adds repeatable, credential-free health-contract and auth-boundary checks. Unlike a status-only monitor, it rejects a misleading 200 HTML SPA fallback when JSON health is expected. `automation-1/visual-checks.json` is the handoff contract for Automation 6; Automation 6 source/reporting infrastructure was not edited.
 
+Additional isolated product-branch repairs completed on 25 August 2026:
+
+- Content Creator `e071085`: aligned all API-facing identity and password-reset copy with the current product name and added two deterministic regression tests.
+- Ad Manager `c5002d4`: replaced obsolete Express/in-memory setup guidance with the current FastAPI, MongoDB, JWT, Stripe webhook, R2 and optional-provider configuration; added a documentation architecture regression test.
+- Bundled Python `unittest` results: Content Creator 2/2 pass; Ad Manager 5/5 pass. Both backend trees pass `compileall`, and both commits pass `git diff --check`.
+
+These development commits are not deployed. They do not alter providers, credentials, paid operations, Automation 2, Automation 6 infrastructure, or any AdSense site repository.
+
 ## Approval or authenticated fixture needed
 
 To prove owner access, forms, real generation, workflow persistence, downloads, Stripe checkout boundaries, and provider publishing, Automation 1 needs a dedicated non-production test account/tenant and explicit approval for any operation that consumes credits or creates external platform drafts. No provider/model change is recommended from current evidence. If Gemini is desired as POD fallback, compare it against the healthy current Runware/Claude path for cost, quality, latency, and data handling before configuration; do not enable it without approval.
+
+Production approval is also required before deploying the Smart Cleaner web-SaaS shell fix (`767ca0e`), Content Creator identity fix (`e071085`), or Ad Manager documentation fix (`c5002d4`). Smart Cleaner `/app` requires a fresh deployed desktop/mobile retest before the visual baseline can be approved.
