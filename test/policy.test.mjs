@@ -1,5 +1,5 @@
 import test from 'node:test'; import assert from 'node:assert/strict'; import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'; import { tmpdir } from 'node:os'; import path from 'node:path';
-import { validateTargetSelection, validateSchedules, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
+import { validateTargetSelection, validateSchedules, validateAutomationRecovery, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
 
 test('discovered candidates cannot be silently selected', () => {
   const inventory = { schemaVersion: '1.0.0', targets: [{ id: 'candidate', selection: 'candidate' }, { id: 'approved', selection: 'approved' }] };
@@ -9,6 +9,18 @@ test('discovered candidates cannot be silently selected', () => {
 test('schedule manifest validates workers and target references', () => {
   const inventory = { targets: [{ id: 'x' }] }; const manifest = { schemaVersion: '1.0.0', schedules: [{ id: 's', cron: '0 * * * *', workerId: 'automation-6', targetSelectors: ['x'], mode: 'read-only' }] };
   assert.equal(validateSchedules(manifest, inventory, new Set(['automation-6'])), manifest);
+});
+
+test('Automation 2 stays frozen and unknown Automations 3 and 4 cannot be invented or activated', async () => {
+  const recovery = JSON.parse(await readFile('config/automation-recovery.json', 'utf8'));
+  assert.equal(validateAutomationRecovery(recovery), recovery);
+  assert.equal(recovery.automations.find((item) => item.id === 'automation-2').status, 'externally-in-testing');
+  for (const id of ['automation-3', 'automation-4']) {
+    const item = recovery.automations.find((candidate) => candidate.id === id);
+    assert.equal(item.enabled, false); assert.equal(item.verifiedLocalBranch, null);
+  }
+  const unsafe = structuredClone(recovery); unsafe.automations.find((item) => item.id === 'automation-3').command = ['node', 'invented.mjs'];
+  assert.throws(() => validateAutomationRecovery(unsafe), /cannot define execution details/);
 });
 
 test('retention defaults to dry-run and is confined to artifact roots', async () => {

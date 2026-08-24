@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedFrom": "verified-local-branch-and-worktree-inventory",
+  "rules": [
+    "Do not infer an automation scope from its number",
+    "Do not create commands, schedules, repositories or live targets until the original scope is verified",
+    "A discovered repository or account is not an approved target",
+    "Recovery is read-only until a dedicated branch and permission contract are confirmed"
+  ],
+  "automations": [
+    {
+      "id": "automation-2",
+      "status": "externally-in-testing",
+      "enabled": false,
+      "freezeReason": "Owner directed Codex to leave all three AdSense sites untouched while ChatGPT tests them",
+      "nextAction": "Wait for owner-provided test results or explicit follow-up"
+    },
+    {
+      "id": "automation-3",
+      "status": "scope-recovery-required",
+      "enabled": false,
+      "verifiedLocalBranch": null,
+      "requiredBeforeActivation": ["original-objective", "repository-or-service-owner", "permission-contract", "result-schema", "test-fixtures", "status-source"]
+    },
+    {
+      "id": "automation-4",
+      "status": "scope-recovery-required",
+      "enabled": false,
+      "verifiedLocalBranch": null,
+      "requiredBeforeActivation": ["original-objective", "repository-or-service-owner", "permission-contract", "result-schema", "test-fixtures", "status-source"]
+    }
+  ]
+}

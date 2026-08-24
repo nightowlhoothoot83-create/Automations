@@ -23,6 +23,21 @@ export function validateSchedules(manifest, inventory, workers) {
   return manifest;
 }
 
+export function validateAutomationRecovery(manifest) {
+  if (manifest?.schemaVersion !== '1.0.0' || !Array.isArray(manifest.automations)) throw new Error('Unsupported automation recovery manifest');
+  const ids = new Set();
+  for (const item of manifest.automations) {
+    if (!item.id || ids.has(item.id)) throw new Error(`Invalid recovery item: ${item.id}`); ids.add(item.id);
+    if (item.status === 'scope-recovery-required') {
+      if (item.enabled !== false || item.verifiedLocalBranch !== null) throw new Error(`${item.id} must remain disabled during scope recovery`);
+      for (const field of ['original-objective', 'repository-or-service-owner', 'permission-contract', 'result-schema', 'test-fixtures', 'status-source']) if (!item.requiredBeforeActivation?.includes(field)) throw new Error(`${item.id} recovery is missing ${field}`);
+      if (item.command || item.schedule || item.targets) throw new Error(`${item.id} cannot define execution details before scope recovery`);
+    }
+    if (item.status === 'externally-in-testing' && item.enabled !== false) throw new Error(`${item.id} must remain frozen during external testing`);
+  }
+  return manifest;
+}
+
 export function validateSaasVerificationContract(contract) {
   if (contract?.schemaVersion !== '1.0.0' || contract.mode !== 'read-only' || !Array.isArray(contract.products)) throw new Error('Unsupported SaaS verification contract');
   const required = ['public-frontend', 'pricing', 'pricing-stripe-parity', 'advertised-claim-coverage', 'every-core-feature-workflow', 'api-calls', 'preview-or-rendering', 'save-and-reload-persistence', 'storage-read-write', 'backend-health', 'webhook-delivery', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];
