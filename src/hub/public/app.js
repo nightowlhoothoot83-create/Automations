@@ -1,6 +1,7 @@
 const operationsStyles = document.createElement('link'); operationsStyles.rel = 'stylesheet'; operationsStyles.href = 'operations.css'; document.head.append(operationsStyles);
 const historyStyles = document.createElement('link'); historyStyles.rel = 'stylesheet'; historyStyles.href = 'history.css'; document.head.append(historyStyles);
 const drilldownStyles = document.createElement('link'); drilldownStyles.rel = 'stylesheet'; drilldownStyles.href = 'drilldown.css'; document.head.append(drilldownStyles);
+const coverageStyles = document.createElement('link'); coverageStyles.rel = 'stylesheet'; coverageStyles.href = 'coverage.css'; document.head.append(coverageStyles);
 let dashboard;
 const $ = (selector) => document.querySelector(selector);
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
@@ -15,7 +16,7 @@ function renderActions(data) {
 }
 function render(data) {
   dashboard = data; renderActions(data);
-  if (data.mode !== 'live') { $('#mode-banner').hidden = false; $('#mode-banner').innerHTML = `<b>${data.mode === 'mixed' ? 'Mixed-source mode' : 'Demonstration mode'}:</b> ${data.mode === 'mixed' ? 'Automation evidence is live, but fixture adapters are visibly labelled.' : 'No Automation 6 run artifact was found. All operational examples are fixture data.'}${data.sourceWarnings.length ? ` · ${esc(data.sourceWarnings.join('; '))}` : ''}`; }
+  if (data.mode !== 'live') { $('#mode-banner').hidden = false; $('#mode-banner').innerHTML = `<b>${data.mode === 'mixed' ? 'Mixed-source mode' : 'Demonstration mode'}:</b> ${data.mode === 'mixed' ? 'Automation 6 evidence is live; fixture and dated snapshot adapters remain individually labelled.' : 'No Automation 6 run artifact was found. Non-live records are individually labelled fixture or snapshot data.'}${data.sourceWarnings.length ? ` · ${esc(data.sourceWarnings.join('; '))}` : ''}`; }
   const metrics = [['Passed',data.overview.passed,''],['Warnings',data.overview.warning,'warning'],['Failed',data.overview.failed,'danger'],['Skipped',data.overview.skipped,''],['Needs attention',data.overview.attention,'warning'],['Approvals',data.overview.approvals,'']];
   $('#metrics').innerHTML = metrics.map(([name,value,state]) => `<article class="metric ${state}"><b>${value}</b><span>${name}</span></article>`).join('');
   $('#business-list').innerHTML = data.businesses.map((item) => `<div class="business-row ${item.status}"><div class="business-icon">${esc(item.name.slice(0,2).toUpperCase())}</div><div class="row-main"><b>${esc(item.name)}</b><small>${esc(item.type)} · ${item.projects} project${item.projects === 1 ? '' : 's'}</small></div><span class="status-dot" title="${esc(item.status)}"></span></div>`).join('');
@@ -33,6 +34,9 @@ function render(data) {
   [data.queues.repairs[0]?.provenance, data.queues.content[0]?.provenance, finance.provenance, data.queues.assets[0]?.provenance].forEach((mode,index) => { sourceHeaders[index].textContent = `${mode || 'unconfigured'}${index === 2 ? ' · estimates' : ' adapter'}`.toUpperCase(); });
   $('#decision-list').innerHTML = data.decisionHistory.map((item) => `<div class="decision-row ${esc(item.decision)}"><span class="decision-mark"></span><div><b>${esc(item.title)}</b><small>${esc(item.actor)} · event ${esc(item.eventId.slice(0,8))}</small></div><span class="provenance">${esc(item.provenance)}</span><time>${when(item.recordedAt)}</time></div>`).join('') || '<p class="muted">No decisions recorded yet. Approval and deferral actions will appear here with timestamps and local event IDs.</p>';
   $('#worker-list').innerHTML = data.runs.map((run) => `<button class="worker-card" data-worker="${esc(run.workerId || 'automation-6')}"><span class="status-dot ${esc(run.status)}"></span><span class="row-main"><b>${esc(run.automation)}</b><small>${esc(run.status)} · ${esc(run.provenance)} · ${esc(run.id)}</small></span><span>→</span></button>`).join('');
+  const coverage=data.evidenceCoverage; $('#coverage-state').textContent=coverage.state.replaceAll('-',' ').toUpperCase();
+  $('#coverage-summary').innerHTML=`<div class="coverage-note ${coverage.canonicalLiveAvailable?'live':''}"><b>${coverage.canonicalLiveAvailable?'Automation 6 live evidence is available.':'No live Automation 6 artifact is available.'}</b><span>${coverage.snapshotItemCount} dated audit conclusions are shown as snapshots only.</span></div>`;
+  $('#coverage-list').innerHTML=coverage.snapshots.flatMap((snapshot)=>snapshot.items.map((item,index)=>`<article class="coverage-item ${item.status==='warning'?'warning':'passed'}"><span class="status-dot"></span><div><b>${esc(item.label)}</b><small>${esc(item.summary)}</small></div><span class="provenance">snapshot</span>${index===snapshot.items.length-1?`<div class="coverage-source"><span>Captured ${when(snapshot.capturedAt)} · ${esc(snapshot.source)}</span><span class="coverage-ref">${esc(snapshot.sourceRef.slice(0,12))}</span></div>`:''}</article>`)).join('')||'<p class="muted">No audit snapshots configured.</p>';
   $('#updated').textContent = `Updated ${when(data.generatedAt)} · ${data.source}`;
 }
 function renderActivity(filter) {

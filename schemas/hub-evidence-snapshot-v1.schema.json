@@ -1,0 +1,13 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://local.invalid/schemas/hub-evidence-snapshot-v1.json",
+  "title":"Automation 5 Evidence Snapshot",
+  "type":"object",
+  "required":["schemaVersion","source","mode","capturedAt","sourceRef","items","approvalItems"],
+  "properties":{
+    "schemaVersion":{"const":"1.0.0"},"source":{"type":"string"},"mode":{"const":"snapshot"},
+    "capturedAt":{"type":"string","format":"date-time"},"sourceRef":{"type":"string"},
+    "items":{"type":"array","items":{"type":"object","required":["id","label","status","summary","coverage"]}},
+    "approvalItems":{"type":"array","items":{"type":"object","required":["id","action","reason","risk","status"]}}
+  }
+}

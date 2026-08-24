@@ -26,6 +26,12 @@ History export produces a portable `ascension-hub-history-export` v1 bundle. Imp
 
 The worker drill-down API (`/api/workers/:id/runs`) follows the configured adapter: report-file sources expose one run, while Automation 6 hub indexes expose every retained run and its unchanged evidence. Missing artifacts return an explicit degraded state. No drill-down action invokes a worker or live system.
 
+## Automation 1 snapshot integration
+
+Automation 1's committed Raven Sharp audit predates the worker report contract and is intentionally ingested through `hub-evidence-snapshot-v1`, not converted into a live Automation 6 run. The checked-in snapshot cites source commit `d5ed6f2d891c3bdab378623030f7786bfdee689f`, capture time, per-product coverage, caveats, and its non-production test-tenant approval need. The dashboard always labels these conclusions `snapshot` and separately states whether canonical Automation 6 live evidence is available.
+
+`config/hub-evidence.example.json` configures snapshot-file adapters and `HUB_EVIDENCE_CONFIG` supports alternative local registries. Missing or invalid snapshots degrade independently. No Automation 1 code, Raven Sharp product repository, AdSense repository, or live site is read or modified at runtime.
+
 ## Current boundaries and decision points
 
 - When `artifacts/hub/runs-v1.json` is absent, the dashboard enters a prominent demonstration mode. Sample data is never represented as a live run.

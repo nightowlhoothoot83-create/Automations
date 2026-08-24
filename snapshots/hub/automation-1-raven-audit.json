@@ -1,0 +1,13 @@
+{
+  "schemaVersion":"1.0.0","source":"automation-1","mode":"snapshot","capturedAt":"2026-08-22T12:11:34+10:00","sourceRef":"d5ed6f2d891c3bdab378623030f7786bfdee689f",
+  "items":[
+    {"id":"image-optimiser","label":"Image Optimiser & Upscaler","status":"passed-with-warning","summary":"Build and public health passed; paid generation, download and owner session remain unproved.","coverage":"public-and-build"},
+    {"id":"pod-suite","label":"POD suite","status":"passed-with-warning","summary":"Build and public health passed; provider publishing remains blocked and unproved.","coverage":"public-and-build"},
+    {"id":"ad-manager","label":"Ad Manager","status":"passed-with-warning","summary":"Smoke tests and health passed; deployment documentation is stale.","coverage":"public-and-build"},
+    {"id":"book-creator","label":"Book Creator","status":"passed-with-warning","summary":"Public page and API passed; authenticated generation and exports remain unproved.","coverage":"public-only"},
+    {"id":"content-creator","label":"Content Creator","status":"passed-with-warning","summary":"Public page and API passed; naming is inconsistent and authenticated generation remains unproved.","coverage":"public-only"},
+    {"id":"smart-cleaner-web","label":"Smart Cleaner web SaaS","status":"passed-with-warning","summary":"Marketing surface passed; no functional connected-drive backend was evidenced.","coverage":"public-only"},
+    {"id":"raven-hub","label":"RavenSharp.com hub","status":"warning","summary":"Direct HTTPS returned 200, while the audit browser encountered a DNS warning.","coverage":"conflicting-runtime-evidence"}
+  ],
+  "approvalItems":[{"id":"automation-1-authenticated-fixture","action":"Approve a dedicated non-production Raven Sharp test tenant","reason":"Required to verify owner access, generation, persistence, downloads, checkout boundaries and provider drafts without touching production data.","risk":"medium","status":"pending"}]
+}
