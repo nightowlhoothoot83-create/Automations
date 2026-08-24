@@ -2,6 +2,8 @@ const operationsStyles = document.createElement('link'); operationsStyles.rel = 
 const historyStyles = document.createElement('link'); historyStyles.rel = 'stylesheet'; historyStyles.href = 'history.css'; document.head.append(historyStyles);
 const drilldownStyles = document.createElement('link'); drilldownStyles.rel = 'stylesheet'; drilldownStyles.href = 'drilldown.css'; document.head.append(drilldownStyles);
 const coverageStyles = document.createElement('link'); coverageStyles.rel = 'stylesheet'; coverageStyles.href = 'coverage.css'; document.head.append(coverageStyles);
+const ascensionStyles = document.createElement('link'); ascensionStyles.rel = 'stylesheet'; ascensionStyles.href = 'ascension-theme.css'; document.head.append(ascensionStyles);
+document.querySelector('.mark').textContent = '◉'; document.querySelector('.brand b').textContent = 'ASCENSION DIGITAL'; document.querySelector('.brand small').textContent = 'GROUP'; document.querySelector('meta[name="theme-color"]').content = '#02030a';
 let dashboard;
 const $ = (selector) => document.querySelector(selector);
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
