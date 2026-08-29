@@ -36,6 +36,11 @@ function reviewApproval(item) {
   return { ...item, evidenceRefs, knownFailures, approvalEligible: blockers.length === 0, approvalBlockers: blockers };
 }
 
+function reviewRun(report, label, mode, workerId) {
+  if (!report.reviewPackage) return null;
+  return { id:`run-${workerId}-${report.runId}`, title:`${label} run ${report.runId}`, runId:report.runId, workerId, ...report.reviewPackage, mode };
+}
+
 export async function loadReport() {
   const index = await readJson(indexPath());
   if (!index?.runs?.length) return null;
@@ -94,6 +99,7 @@ export async function buildDashboard() {
     runs: [{ id: report.runId, automation: 'Automation 6', status: report.status, startedAt: report.startedAt, finishedAt: report.finishedAt, summary: report.summary, provenance:realReport ? 'live' : 'fixture' }, ...extraWorkers.map((worker) => ({ id:worker.report.runId, automation:worker.label, workerId:worker.workerId, status:worker.report.status, startedAt:worker.report.startedAt, finishedAt:worker.report.finishedAt, summary:worker.report.summary, provenance:worker.mode }))],
     activity: [...historyEvents.map((event) => ({ id:event.eventId, title:event.title, kind:event.type, status:event.decision === 'approved' ? 'passed' : 'warning', at:event.recordedAt, durationMs:0, evidence:{ decision:event.decision, approvalId:event.approvalId, actor:event.actor }, provenance:'local' })), ...report.results.map((item) => ({ id: item.id, title: resultTitle(item), kind: item.kind, status: item.status, at: item.startedAt, durationMs: item.durationMs, evidence: item.evidence, provenance:realReport ? 'live' : 'fixture' })), ...extraWorkers.flatMap((worker) => worker.report.results.map((item) => ({ id:item.id, title:resultTitle(item), kind:item.kind, status:item.status, at:item.startedAt, durationMs:item.durationMs, evidence:item.evidence, provenance:worker.mode, workerId:worker.workerId })))].sort((a,b)=>b.at.localeCompare(a.at)),
     approvals: openApprovals,
+    runReviews: [reviewRun(report,'Automation 6',realReport ? 'live-artifact' : 'fixture','automation-6'), ...extraWorkers.map((worker)=>reviewRun(worker.report,worker.label,worker.mode,worker.workerId))].filter(Boolean),
     decisionHistory: historyEvents.filter((event) => event.type === 'approval-decision'),
     evidenceCoverage:{state:realReport?'live-plus-snapshots':'snapshot-only',canonicalLiveAvailable:Boolean(realReport),snapshots:snapshots.map((snapshot)=>({source:snapshot.source,sourceId:snapshot.sourceId,capturedAt:snapshot.capturedAt,sourceRef:snapshot.sourceRef,mode:snapshot.mode,items:snapshot.items})),snapshotItemCount:snapshots.reduce((count,snapshot)=>count+snapshot.items.length,0)},
     queues: { content, assets, repairs, finance },

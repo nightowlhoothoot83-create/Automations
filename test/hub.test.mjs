@@ -15,9 +15,9 @@ test('hub ingests Automation 6 report-v1 and preserves evidence', { concurrency:
   const cwd = process.cwd(); const directory = await mkdtemp(join(tmpdir(), 'ascension-hub-'));
   try {
     process.chdir(directory); await mkdir('artifacts/hub', { recursive: true }); await mkdir('artifacts/runs/real', { recursive: true });
-    const report = { schemaVersion:'1.0.0',runId:'real',startedAt:'2026-08-22T00:00:00.000Z',finishedAt:'2026-08-22T00:01:00.000Z',status:'failed',summary:{passed:0,warning:0,failed:1,skipped:0},results:[{id:'real-test',kind:'test',status:'failed',startedAt:'2026-08-22T00:00:00.000Z',durationMs:3,evidence:{exitCode:9}}],approvals:[] };
+    const report = { schemaVersion:'1.0.0',runId:'real',startedAt:'2026-08-22T00:00:00.000Z',finishedAt:'2026-08-22T00:01:00.000Z',status:'failed',summary:{passed:0,warning:0,failed:1,skipped:0},results:[{id:'real-test',kind:'test',status:'failed',startedAt:'2026-08-22T00:00:00.000Z',durationMs:3,evidence:{exitCode:9}}],approvals:[],reviewPackage:{capturedAt:'2026-08-22T00:01:00.000Z',evidenceStatus:'failed',knownFailures:1,evidenceRefs:[{label:'Run evidence',url:'/#worker-evidence'}],provenance:'local-run',approvalRequested:false} };
     await writeFile('artifacts/runs/real/report.json', JSON.stringify(report)); await writeFile('artifacts/hub/runs-v1.json', JSON.stringify({schemaVersion:'1.0.0',updatedAt:report.finishedAt,latestRunId:'real',runs:[{runId:'real',reportPath:'artifacts/runs/real/report.json'}]}));
-    const dashboard = await buildDashboard(); assert.equal(dashboard.mode, 'live'); assert.equal(dashboard.activity[0].evidence.exitCode, 9); assert.equal(dashboard.nextTask.id, 'real-test');
+    const dashboard = await buildDashboard(); assert.equal(dashboard.mode, 'live'); assert.equal(dashboard.activity[0].evidence.exitCode, 9); assert.equal(dashboard.nextTask.id, 'real-test'); assert.equal(dashboard.runReviews[0].knownFailures,1);
   } finally { process.chdir(cwd); }
 });
 
