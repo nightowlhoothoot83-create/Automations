@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "local-contract-only",
+  "selectionRule": "explicit-user-selection-required",
+  "commonStages": ["validate-prerequisites", "prepare-safe-prepublication-state", "owner-review", "publish-separately-after-approval"],
+  "providers": [
+    {
+      "id": "printify",
+      "name": "Printify",
+      "ingestionMechanism": "direct-api-product-creation",
+      "safePrepublicationState": "draft-product",
+      "directFromArtwork": "yes",
+      "prerequisites": ["api-access", "shop-id", "provider-product-blueprint", "print-provider-selection"],
+      "creationAndPublishingSeparate": true,
+      "activationStatus": "credentials-and-live-evidence-required",
+      "evidenceClass": "recovered-contract"
+    },
+    {
+      "id": "gelato",
+      "name": "Gelato",
+      "ingestionMechanism": "template-based-product-creation",
+      "safePrepublicationState": "non-visible-product",
+      "directFromArtwork": "no",
+      "existingProductTemplateRequired": true,
+      "prerequisites": ["api-access", "store-connection", "validated-existing-template-id", "template-provenance"],
+      "creationAndPublishingSeparate": true,
+      "draftOrderIsNotProductDraft": true,
+      "activationStatus": "template-credentials-and-live-evidence-required",
+      "evidenceClass": "recovered-contract-owner-corrected"
+    },
+    {
+      "id": "printful",
+      "name": "Printful",
+      "ingestionMechanism": "unverified-provider-specific",
+      "safePrepublicationState": "unverified",
+      "directFromArtwork": "unverified",
+      "prerequisites": ["current-official-contract-verification"],
+      "creationAndPublishingSeparate": "unverified",
+      "activationStatus": "blocked-until-official-contract-verified",
+      "evidenceClass": "recovered-provider-membership-only"
+    },
+    {
+      "id": "redbubble",
+      "name": "Redbubble",
+      "ingestionMechanism": "bulk-upload-or-import",
+      "safePrepublicationState": "unverified",
+      "directFromArtwork": "no-direct-api-assumption",
+      "prerequisites": ["current-official-ingestion-requirements", "account-workflow-verification"],
+      "creationAndPublishingSeparate": "unverified",
+      "activationStatus": "blocked-until-official-contract-verified",
+      "evidenceClass": "recovered-bulk-upload-contract"
+    },
+    {
+      "id": "merch-by-amazon",
+      "name": "Merch by Amazon",
+      "ingestionMechanism": "feed-or-export",
+      "safePrepublicationState": "unverified",
+      "directFromArtwork": "no-direct-api-assumption",
+      "prerequisites": ["current-official-feed-requirements", "account-workflow-verification"],
+      "creationAndPublishingSeparate": "unverified",
+      "activationStatus": "blocked-until-official-contract-verified",
+      "evidenceClass": "recovered-feed-export-contract"
+    }
+  ],
+  "rules": [
+    "Never silently select or hard-code a provider",
+    "Never fake a common capability that a provider does not offer",
+    "Missing provider prerequisites produce a blocked plan rather than invented identifiers",
+    "Safe product creation and publishing are separate operations",
+    "No adapter may publish, order, spend, deploy or mutate a provider account from this contract"
+  ]
+}
