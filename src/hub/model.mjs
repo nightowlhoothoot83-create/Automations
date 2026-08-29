@@ -6,7 +6,7 @@ import { appendHistory, readHistory } from './history.mjs';
 import { loadEvidenceSnapshots } from './evidence.mjs';
 
 const REPORT_VERSION = '1.0.0';
-const indexPath = () => resolve('artifacts/hub/runs-v1.json');
+const indexPath = () => resolve(process.env.HUB_RUN_INDEX_PATH || 'artifacts/hub/runs-v1.json');
 const decisionsPath = () => resolve('data/hub/decisions.json');
 
 async function readJson(path, fallback = null) {
@@ -23,6 +23,18 @@ function validateReport(report) {
 
 function priority(status) { return status === 'failed' ? 0 : status === 'warning' ? 1 : 2; }
 function resultTitle(result) { return result.id.replace(/[._-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()); }
+
+function reviewApproval(item) {
+  const evidenceRefs = Array.isArray(item.evidenceRefs) ? item.evidenceRefs.filter(Boolean) : [];
+  const knownFailures = Number.isInteger(item.knownFailures) ? item.knownFailures : null;
+  const blockers = [];
+  if (item.provenance !== 'live') blockers.push(`${item.provenance || 'unknown'} evidence is not current live evidence`);
+  if (!item.capturedAt) blockers.push('capture time is missing');
+  if (!evidenceRefs.length) blockers.push('no review evidence is attached');
+  if (item.evidenceStatus !== 'passed') blockers.push('evidence has not passed');
+  if (knownFailures !== 0) blockers.push(knownFailures === null ? 'known-failure count is missing' : `${knownFailures} known failure${knownFailures === 1 ? '' : 's'} remain`);
+  return { ...item, evidenceRefs, knownFailures, approvalEligible: blockers.length === 0, approvalBlockers: blockers };
+}
 
 export async function loadReport() {
   const index = await readJson(indexPath());
@@ -60,7 +72,7 @@ export async function buildDashboard() {
   const sourceApprovals = (sources.approvals?.items || []).map((item) => ({ ...item, provenance: sources.approvals.mode }));
   const workerApprovals = extraWorkers.flatMap((worker) => worker.report.approvals.map((item) => ({ ...item, priority: 3, provenance: worker.mode, workerId: worker.workerId })));
   const evidenceApprovals = snapshots.flatMap((snapshot)=>snapshot.approvalItems.map((item)=>({...item,priority:4,provenance:'snapshot',sourceRef:snapshot.sourceRef,workerId:snapshot.source})));
-  const openApprovals = [...report.approvals.map((item) => ({ ...item, priority: 0, provenance: realReport ? 'live' : 'fixture', workerId:'automation-6' })), ...sourceApprovals, ...workerApprovals, ...evidenceApprovals].filter((item) => !decisions[item.id]).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+  const openApprovals = [...report.approvals.map((item) => ({ ...item, priority: 0, provenance: realReport ? 'live' : 'fixture', workerId:'automation-6' })), ...sourceApprovals, ...workerApprovals, ...evidenceApprovals].filter((item) => !decisions[item.id]).map(reviewApproval).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
   const repairs = (sources.repairs?.items || []).map((item) => ({ ...item, provenance: sources.repairs.mode }));
   const work = [
     ...report.results.filter((item) => ['failed', 'warning'].includes(item.status)).map((item) => ({ id: item.id, title: resultTitle(item), status: item.status, detail: item.evidence.summary || item.evidence.warning || 'Review captured test evidence.', rank: priority(item.status), provenance: realReport ? 'live' : 'fixture' })),
@@ -91,7 +103,11 @@ export async function buildDashboard() {
 }
 
 export async function recordDecision(id, decision) {
-  if (!id || !['approved', 'deferred'].includes(decision)) throw new Error('Invalid approval decision');
+  if (!id || !['approved', 'deferred', 'changes-requested'].includes(decision)) throw new Error('Invalid approval decision');
+  const dashboard = await buildDashboard();
+  const approval = dashboard.approvals.find((item) => item.id === id);
+  if (!approval) throw new Error('Approval item is not open or does not exist');
+  if (decision === 'approved' && !approval.approvalEligible) throw new Error(`Approval blocked: ${approval.approvalBlockers.join('; ')}`);
   const path = decisionsPath();
   const current = await readJson(path, {});
   await mkdir(dirname(path), { recursive: true });

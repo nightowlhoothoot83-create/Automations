@@ -10,6 +10,8 @@ Automation 6 owns `schemas/report-v1.schema.json` and `schemas/hub-runs-v1.schem
 
 The hub API response is a presentation view, not a worker reporting contract. Manual approval decisions are stored locally in ignored `data/hub/decisions.json`. Recording a decision does not execute a merge, deployment, DNS change, secret change, or other production mutation.
 
+When Automation 6 runs from another checkout or worktree, set `HUB_RUN_INDEX_PATH` to its absolute `artifacts/hub/runs-v1.json` path before starting the Hub. Report paths remain sourced from that versioned index; the Hub does not copy, rewrite, or promote them.
+
 ## Modular source adapters
 
 `schemas/hub-source-v1.schema.json` defines a small Automation 5-owned envelope for content, assets, finance, repairs, and approval queues. `config/hub-sources.example.json` configures JSON-file adapters; real integrations can replace paths using `HUB_SOURCES_CONFIG` without changing the UI. Every envelope must declare `mode: live` or `mode: fixture`, and the dashboard exposes that provenance.
@@ -21,6 +23,8 @@ The checked-in `fixtures/hub/` records make each module testable without credent
 `config/hub-workers.example.json` registers Automation 6 as a live hub-index reader and Automation 2 as an unmistakable fixture report. Both declare `automation-6/report-v1@1.0.0`; this reuses Automation 6's schema ownership rather than creating a competing result shape. Override the registry with `HUB_WORKERS_CONFIG`. Missing indexes and incompatible results degrade into dashboard warnings.
 
 Owner decisions append v1 events to ignored `data/hub/activity-v1.jsonl` and update the local current-state index. The dashboard shows event ID, actor, timestamp, decision, and provenance. Malformed journal lines are skipped with visible warnings, preserving valid history. `HUB_HISTORY_PATH` supports isolated local testing and future storage adapters.
+
+The owner review queue exposes attached preview/report/screenshot links and separates `Approve`, `Request changes`, and `Defer`. Approval is enforced by the server, not only the UI: an item must be live, captured, have at least one evidence reference, report passed evidence, and declare zero known failures. Fixture, snapshot, incomplete, or failing items remain visible but cannot be approved. Recording a decision never deploys or publishes.
 
 History export produces a portable `ascension-hub-history-export` v1 bundle. Import validates every event, preserves original IDs and provenance, and skips duplicates. Retention never silently discards history: older records are written to ignored `data/hub/archives/` before the active JSONL journal is compacted. `HUB_HISTORY_ARCHIVE_DIR` supports isolated storage.
 
