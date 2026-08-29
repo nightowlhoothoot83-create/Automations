@@ -17,6 +17,8 @@ The repository began empty. It had no Git remote, GitHub Actions workflows, Clou
 
 `schemas/report-v1.schema.json` is the stable ingestion contract. Every report and JSONL event includes `schemaVersion: 1.0.0`; incompatible changes require a new schema version. Reports contain run timing, aggregate status, per-check evidence, and approval items. This is the boundary intended for future Management Hub ingestion.
 
+Every new report also contains a `reviewPackage` with capture time, evidence status, known-failure count, evidence references, provenance, and whether an approval was requested. Ordinary completed tests are reviewable without creating a fake deployment approval. `config/local-self-check.json` provides a deterministic no-network producer for the local test suite.
+
 Each run atomically updates `artifacts/hub/runs-v1.json`, a bounded, deduplicated index described by `schemas/hub-runs-v1.schema.json`. `config/orchestration.json` registers Automation 6 and reserves disabled entries for Automations 1 and 5 so their status sources can be connected without changing the coordination contract.
 
 ## Check types

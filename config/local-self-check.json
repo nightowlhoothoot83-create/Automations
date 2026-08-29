@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0.0",
+  "defaults": { "timeoutMs": 10000, "maxBodyBytes": 1000000 },
+  "targets": [],
+  "commands": [
+    { "id": "automation-6-test-suite", "kind": "regression", "executable": "node", "args": ["--test"], "timeoutMs": 300000, "shell": false }
+  ]
+}

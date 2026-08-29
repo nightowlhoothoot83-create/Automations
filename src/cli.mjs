@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { REPORT_SCHEMA_VERSION, validateConfig, checkTarget, runCommand, writeRun, updateHubIndex } from './core.mjs';
+import { REPORT_SCHEMA_VERSION, validateConfig, checkTarget, runCommand, writeRun, updateHubIndex, createReviewPackage } from './core.mjs';
 
 const args = process.argv.slice(2); const configPath = args[args.indexOf('--config') + 1] || 'config/targets.example.json';
 const config = validateConfig(JSON.parse(await readFile(configPath, 'utf8')));
@@ -15,7 +15,8 @@ for (const request of screenshotRequests) results.push({ id: request.targetId, k
 const summary = { passed: 0, warning: 0, failed: 0, skipped: 0 };
 for (const item of results) if (!(item.status in summary)) throw new Error(`Unknown result status: ${item.status}`); else summary[item.status]++;
 const status = summary.failed ? 'failed' : summary.warning ? 'warning' : 'passed';
-const report = { schemaVersion: REPORT_SCHEMA_VERSION, runId, startedAt, finishedAt: new Date().toISOString(), status, summary, results, approvals, source: { config: path.resolve(configPath), gitSha: process.env.GITHUB_SHA ?? null } };
+const finishedAt = new Date().toISOString();
+const report = { schemaVersion: REPORT_SCHEMA_VERSION, runId, startedAt, finishedAt, status, summary, results, approvals, reviewPackage: createReviewPackage({ capturedAt:finishedAt, status, summary, approvals }), source: { config: path.resolve(configPath), gitSha: process.env.GITHUB_SHA ?? null } };
 const dir = await writeRun(path.resolve('artifacts/runs'), report, screenshotRequests);
 const reportPath = path.join(dir, 'report.json'); const hubIndex = await updateHubIndex(path.resolve('artifacts/hub'), report, reportPath);
 console.log(JSON.stringify({ runId, status, summary, report: reportPath, hubIndex }));

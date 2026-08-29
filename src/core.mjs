@@ -4,6 +4,11 @@ import path from 'node:path';
 
 export const REPORT_SCHEMA_VERSION = '1.0.0';
 
+export function createReviewPackage({ capturedAt, status, summary, approvals }) {
+  if (!capturedAt || !['passed','warning','failed'].includes(status) || !Number.isInteger(summary?.failed) || !Array.isArray(approvals)) throw new Error('Invalid review package inputs');
+  return { capturedAt, evidenceStatus: status, knownFailures: summary.failed, evidenceRefs: [{ label: 'Run evidence drill-down', url: '/#worker-evidence' }], provenance: 'local-run', approvalRequested: approvals.length > 0 };
+}
+
 export function validateConfig(config) {
   if (config?.schemaVersion !== REPORT_SCHEMA_VERSION) throw new Error(`Unsupported config schemaVersion: ${config?.schemaVersion ?? 'missing'}`);
   if (!Array.isArray(config.targets) || !Array.isArray(config.commands)) throw new Error('Config requires targets and commands arrays');
