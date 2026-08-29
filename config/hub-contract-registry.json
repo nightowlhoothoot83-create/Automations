@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "consumer": "automation-5-management-hub",
+  "mode": "handoff-only",
+  "contracts": [
+    {
+      "id": "automation-6-report-v1",
+      "schemaPath": "schemas/report-v1.schema.json",
+      "producer": "automation-6",
+      "adapter": "hub-index",
+      "allowedProvenance": ["live-read-only", "local-fixture"],
+      "statusVocabulary": ["passed", "warning", "failed"]
+    },
+    {
+      "id": "pod-production-run-v1",
+      "schemaPath": "schemas/pod-production-run-v1.schema.json",
+      "producer": "automation-6-pod-production",
+      "adapter": "pod-preflight",
+      "allowedProvenance": ["local-fixture", "provider-evidence-pending-approval"],
+      "statusVocabulary": ["blocked", "pending-owner-approval"]
+    },
+    {
+      "id": "automation-1-smoke-snapshot",
+      "schemaPath": null,
+      "producer": "automation-1",
+      "adapter": "snapshot-until-report-adapter-exists",
+      "allowedProvenance": ["repository-snapshot"],
+      "statusVocabulary": ["snapshot-pass", "snapshot-fail"],
+      "requiredBeforeLive": ["capture-time", "target-url", "deployed-identity", "fresh-result"]
+    }
+  ],
+  "rules": [
+    "The Hub must display the source contract and provenance on every record",
+    "Adapters may map display fields but must preserve the original evidence object",
+    "POD pending-owner-approval must not be mapped to passed",
+    "Automation 1 snapshot-pass must not be mapped to a live pass",
+    "Unknown schemas or status values must degrade visibly and remain non-actionable"
+  ]
+}

@@ -21,3 +21,15 @@ test('Management Hub index is atomically updated and deduplicated', async () => 
   const indexPath = await updateHubIndex(root, report, '/runs/run-1/report.json'); await updateHubIndex(root, report, '/runs/run-1/report.json');
   const index = JSON.parse(await readFile(indexPath, 'utf8')); assert.equal(index.runs.length, 1); assert.equal(index.latestRunId, 'run-1');
 });
+
+test('Management Hub contract registry preserves POD and Automation 1 provenance', async () => {
+  const registry = JSON.parse(await readFile('config/hub-contract-registry.json', 'utf8'));
+  assert.equal(registry.mode, 'handoff-only'); assert.equal(registry.consumer, 'automation-5-management-hub');
+  const pod = registry.contracts.find((item) => item.id === 'pod-production-run-v1');
+  assert.deepEqual(pod.statusVocabulary, ['blocked', 'pending-owner-approval']); assert.ok(pod.allowedProvenance.includes('local-fixture'));
+  const raven = registry.contracts.find((item) => item.id === 'automation-1-smoke-snapshot');
+  assert.equal(raven.adapter, 'snapshot-until-report-adapter-exists'); assert.ok(raven.requiredBeforeLive.includes('deployed-identity'));
+  assert.ok(registry.rules.includes('POD pending-owner-approval must not be mapped to passed'));
+  assert.ok(registry.rules.includes('Automation 1 snapshot-pass must not be mapped to a live pass'));
+  for (const contract of registry.contracts.filter((item) => item.schemaPath)) await readFile(contract.schemaPath, 'utf8');
+});
