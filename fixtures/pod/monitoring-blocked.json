@@ -1,0 +1,19 @@
+{
+  "provider-capability-version": "fixture-2",
+  "provider-pricing-captured-at": "fixture-current",
+  "estimated-provider-cost": 0.14,
+  "estimated-credits": 45,
+  "missing-evidence-count": 1,
+  "provider-upload-acceptance": false,
+  "mockup-source-artwork-sha256": "redrawn-artwork",
+  "evidenceCapturedAt": "2026-08-20T00:00:00.000Z",
+  "providerCapabilityVersion": "fixture-2",
+  "acceptedProviderCapabilityVersion": "fixture-1",
+  "baselineProviderCostUsd": 0.095,
+  "estimatedProviderCostUsd": 0.14,
+  "baselineCredits": 28,
+  "estimatedCredits": 45,
+  "providerUploadAcceptance": false,
+  "mockupSourceArtworkSha256": "redrawn-artwork",
+  "finalArtworkSha256": "same-final-artwork"
+}

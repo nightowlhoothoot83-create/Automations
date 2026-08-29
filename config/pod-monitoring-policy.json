@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "read-only",
+  "scheduleStatus": "definition-only-disabled",
+  "thresholds": {
+    "maximumEvidenceAgeHours": 24,
+    "maximumCostIncreasePercent": 20,
+    "maximumCreditEstimateIncreasePercent": 20
+  },
+  "requiredSignals": [
+    "provider-capability-version",
+    "provider-pricing-captured-at",
+    "estimated-provider-cost",
+    "estimated-credits",
+    "missing-evidence-count",
+    "provider-upload-acceptance",
+    "mockup-source-artwork-sha256"
+  ],
+  "rules": [
+    "Monitoring may create evidence and pending approval items but may not alter providers, prices, credits, drafts or production",
+    "Capability-version changes invalidate earlier provider acceptance until retested",
+    "Cost or credit drift beyond threshold blocks approval and requires a new preflight",
+    "Stale evidence cannot qualify a draft for approval"
+  ]
+}
