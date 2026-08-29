@@ -38,6 +38,24 @@ export function validateAutomationRecovery(manifest) {
   return manifest;
 }
 
+export function validateIntegrationReconciliation(manifest) {
+  if (manifest?.schemaVersion !== '1.0.0' || manifest.mode !== 'read-only-reconciliation' || !Array.isArray(manifest.sources)) throw new Error('Unsupported integration reconciliation');
+  if (manifest.mergeEligible !== false) throw new Error('Reconciliation cannot silently authorize a merge');
+  const byId = new Map(manifest.sources.map((item) => [item.id, item]));
+  if (byId.size !== manifest.sources.length) throw new Error('Duplicate integration source');
+  const integrated = byId.get('integrated-branch');
+  if (integrated?.status !== 'blocked-from-merge' || !integrated.blockers?.includes('automation-2-is-enabled-but-owner-freeze-requires-untouched')) throw new Error('Integrated branch must record the Automation 2 freeze conflict');
+  const adsense = byId.get('automation-2');
+  if (adsense?.status !== 'untouched' || adsense.enabled !== false) throw new Error('Automation 2 must remain untouched and disabled');
+  for (const id of ['automation-3', 'automation-4']) if (byId.get(id)?.status !== 'guarded-disabled' || byId.get(id)?.enabled !== false) throw new Error(`${id} must remain guarded`);
+  const raven = byId.get('automation-1');
+  if (raven?.evidenceClass !== 'repository-snapshot' || !/not current live evidence/i.test(raven.liveClaimRule)) throw new Error('Automation 1 snapshot provenance is incomplete');
+  const hub = byId.get('automation-5');
+  if (!/live or fixture mode/i.test(hub?.provenanceContract ?? '')) throw new Error('Management Hub provenance contract is incomplete');
+  for (const required of ['Fixture evidence must never be represented as live evidence', 'A branch-ready repair must never be represented as deployed', 'Passing deterministic tests must never be represented as a current live-site pass']) if (!manifest.provenanceRules.includes(required)) throw new Error(`Missing provenance rule: ${required}`);
+  return manifest;
+}
+
 export function validateSaasVerificationContract(contract) {
   if (contract?.schemaVersion !== '1.0.0' || contract.mode !== 'read-only' || !Array.isArray(contract.products)) throw new Error('Unsupported SaaS verification contract');
   const required = ['public-frontend', 'pricing', 'pricing-stripe-parity', 'advertised-claim-coverage', 'every-core-feature-workflow', 'api-calls', 'preview-or-rendering', 'save-and-reload-persistence', 'storage-read-write', 'backend-health', 'webhook-delivery', 'stripe-test-surface', 'privacy', 'terms', 'footer', 'desktop', 'mobile'];

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "capturedAt": "2026-08-30T00:00:00.000Z",
+  "mode": "read-only-reconciliation",
+  "mergeEligible": false,
+  "sources": [
+    {
+      "id": "integrated-branch",
+      "ref": "codex/automations-integrated",
+      "verifiedHead": "0f5a6ed",
+      "evidenceClass": "repository-snapshot",
+      "status": "blocked-from-merge",
+      "blockers": ["automation-2-is-enabled-but-owner-freeze-requires-untouched", "latest-automation-6-commits-not-integrated"]
+    },
+    {
+      "id": "automation-1",
+      "ref": "codex/automation-1-raven-sharp-qa",
+      "verifiedHead": "c4f1adc",
+      "evidenceClass": "repository-snapshot",
+      "status": "verified-local-source",
+      "deterministicTests": { "passed": 4, "failed": 0 },
+      "liveClaimRule": "A repository or screenshot snapshot is not current live evidence without capture time, deployed commit or deployment identifier, target URL and fresh result"
+    },
+    {
+      "id": "automation-5",
+      "ref": "codex/automation-5-management-hub",
+      "verifiedHead": "04b7f9b",
+      "evidenceClass": "repository-snapshot",
+      "status": "verified-local-source",
+      "provenanceContract": "Hub sources must explicitly declare live or fixture mode"
+    },
+    {
+      "id": "automation-6",
+      "ref": "codex/automation-6-infrastructure",
+      "verifiedBaseHead": "0fdd1d4",
+      "evidenceClass": "active-local-branch",
+      "status": "authoritative-for-current-safety-contracts"
+    },
+    {
+      "id": "automation-2",
+      "ref": "codex/automation-2-adsense-qa",
+      "evidenceClass": "frozen-external-testing",
+      "status": "untouched",
+      "enabled": false
+    },
+    { "id": "automation-3", "evidenceClass": "scope-unverified", "status": "guarded-disabled", "enabled": false },
+    { "id": "automation-4", "evidenceClass": "scope-unverified", "status": "guarded-disabled", "enabled": false }
+  ],
+  "provenanceRules": [
+    "Fixture evidence must never be represented as live evidence",
+    "A branch-ready repair must never be represented as deployed",
+    "Passing deterministic tests must never be represented as a current live-site pass",
+    "Current live evidence requires capture time, target URL, deployed identity and fresh pass/fail results",
+    "No source may create a silent merge, deployment, baseline update or production approval"
+  ]
+}

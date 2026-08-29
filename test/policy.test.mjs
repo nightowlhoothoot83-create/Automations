@@ -1,5 +1,5 @@
 import test from 'node:test'; import assert from 'node:assert/strict'; import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'; import { tmpdir } from 'node:os'; import path from 'node:path';
-import { validateTargetSelection, validateSchedules, validateAutomationRecovery, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
+import { validateTargetSelection, validateSchedules, validateAutomationRecovery, validateIntegrationReconciliation, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
 
 test('discovered candidates cannot be silently selected', () => {
   const inventory = { schemaVersion: '1.0.0', targets: [{ id: 'candidate', selection: 'candidate' }, { id: 'approved', selection: 'approved' }] };
@@ -29,6 +29,15 @@ test('Automation 2 stays frozen and unknown Automations 3 and 4 cannot be invent
   }
   const unsafe = structuredClone(recovery); unsafe.automations.find((item) => item.id === 'automation-3').command = ['node', 'invented.mjs'];
   assert.throws(() => validateAutomationRecovery(unsafe), /cannot define execution details/);
+});
+
+test('integration reconciliation preserves live-vs-snapshot provenance and blocks the stale integrated branch', async () => {
+  const reconciliation = JSON.parse(await readFile('config/integration-reconciliation.json', 'utf8'));
+  assert.equal(validateIntegrationReconciliation(reconciliation), reconciliation);
+  assert.equal(reconciliation.mergeEligible, false);
+  assert.equal(reconciliation.sources.find((item) => item.id === 'automation-1').deterministicTests.passed, 4);
+  const unsafe = structuredClone(reconciliation); unsafe.mergeEligible = true;
+  assert.throws(() => validateIntegrationReconciliation(unsafe), /cannot silently authorize/);
 });
 
 test('retention defaults to dry-run and is confined to artifact roots', async () => {
