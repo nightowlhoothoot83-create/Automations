@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixtureOnly": true,
+  "runId": "pod-preflight-fixture",
+  "providerId": "fixture-direct-connect",
+  "selections": [
+    { "productId": "mug", "variant": "standard" },
+    { "productId": "shirt", "variant": "adult-front" }
+  ],
+  "expectedCosts": [
+    { "id": "artwork-generation", "usd": 0.06 },
+    { "id": "suitability-analysis", "usd": 0.01 },
+    { "id": "upscale-or-tiling", "usd": 0.02 },
+    { "id": "storage-and-egress", "usd": 0.005 }
+  ],
+  "evidence": {
+    "source-artwork-sha256": "fixture-source-hash",
+    "provider-capability-version": "fixture-1",
+    "product-and-variant": ["mug:standard", "shirt:adult-front"],
+    "required-pixel-dimensions": ["2550x1050", "4500x5400"],
+    "effective-dpi": 300,
+    "format-and-colour-profile": "PNG/sRGB",
+    "transparency-or-background-choice": "transparent",
+    "bleed-and-safe-area": "fixture-pass",
+    "placement-and-scale": "fixture-pass",
+    "artifact-check": "fixture-pass",
+    "credit-preflight": "fixture-pass"
+  }
+}

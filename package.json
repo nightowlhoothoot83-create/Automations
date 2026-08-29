@@ -11,7 +11,8 @@
     "connections:check": "node src/connections-cli.mjs",
     "policy:check": "node src/policy-cli.mjs",
     "visual:check": "node src/visual-gate-cli.mjs",
-    "compare:dry-run": "node src/deployed-branch-compare-cli.mjs"
+    "compare:dry-run": "node src/deployed-branch-compare-cli.mjs",
+    "pod:preflight:fixture": "node src/pod-preflight-cli.mjs"
   },
   "engines": {
     "node": ">=20"

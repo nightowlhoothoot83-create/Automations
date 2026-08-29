@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { requiredPixels, planMasterArtwork, calculateProductionCredits, validateDeterministicMockup, validateDraftEligibility, buildPodHubRun } from '../src/pod-production.mjs';
+const execFileAsync = promisify(execFile);
 
 test('POD dimensions come from the selected provider product rather than DPI metadata', async () => {
   const fixtures = JSON.parse(await readFile('fixtures/pod/provider-capabilities.json', 'utf8'));
@@ -41,4 +44,13 @@ test('POD preflight produces a versioned Management Hub run without auto-approva
   assert.equal(run.schemaVersion, '1.0.0'); assert.equal(run.automationId, 'automation-6-pod-production'); assert.equal(run.status, 'pending-owner-approval');
   assert.equal(run.approval.required, true); assert.equal(run.approval.status, 'pending'); assert.equal(run.summary.selectedProducts.length, 2);
   assert.throws(() => buildPodHubRun({ runId: 'bad', startedAt: 'x', finishedAt: 'y', products, masterPlan, creditPlan: { credits: 1 }, draftResult: { status: 'approved', missing: [] } }), /cannot auto-approve/);
+});
+
+test('fixture-only POD preflight CLI emits blocked Hub evidence without network or credentials', async () => {
+  const { stdout } = await execFileAsync(process.execPath, ['src/pod-preflight-cli.mjs'], { cwd: process.cwd() });
+  const report = JSON.parse(stdout);
+  assert.equal(report.status, 'blocked'); assert.equal(report.evidence.fixtureOnly, true);
+  assert.equal(report.summary.masterWidthPx, 4500); assert.equal(report.summary.masterHeightPx, 5400);
+  assert.ok(report.summary.estimatedCredits > 0); assert.equal(report.summary.missingEvidenceCount, 2);
+  assert.equal(report.approval.status, 'pending');
 });
