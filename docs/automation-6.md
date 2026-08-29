@@ -60,3 +60,5 @@ POD production preflights publish `schemas/pod-production-run-v1.schema.json` re
 Run `npm run pod:preflight:fixture` to exercise the complete POD planning path without network access, credentials, paid generation or live provider calls. The fixture intentionally omits the final-artwork hash and provider upload acceptance, so the resulting Hub record is blocked and demonstrates the evidence gate rather than simulating a production pass.
 
 `config/pod-monitoring-policy.json` adds read-only drift monitoring for provider capability versions, evidence age, provider costs, credit estimates, upload acceptance and mockup artwork identity. The schedule remains definition-only and disabled. Any drift or stale/missing evidence blocks approval and requires a new preflight; a clean monitoring result remains pending owner approval rather than becoming an automatic pass.
+
+The disabled `pod-preflight-drift-template` schedule documents the intended recurring check without enabling it. Local POD preflight evidence has a separate bounded retention class of 90 days or 200 items; retention remains dry-run unless explicitly executed and is confined to the local artifact root.

@@ -11,6 +11,14 @@ test('schedule manifest validates workers and target references', () => {
   assert.equal(validateSchedules(manifest, inventory, new Set(['automation-6'])), manifest);
 });
 
+test('POD monitoring schedule stays disabled and its local evidence has bounded retention', async () => {
+  const schedules = JSON.parse(await readFile('config/schedules.json', 'utf8'));
+  const pod = schedules.schedules.find((item) => item.id === 'pod-preflight-drift-template');
+  assert.equal(pod.enabled, false); assert.equal(pod.mode, 'read-only'); assert.equal(pod.workerId, 'automation-6');
+  const retention = JSON.parse(await readFile('config/retention-policy.json', 'utf8'));
+  assert.equal(retention.artifacts.podPreflights.path, 'artifacts/pod-preflights'); assert.equal(retention.artifacts.podPreflights.maxAgeDays, 90); assert.equal(retention.deletionMode, 'local-generated-only');
+});
+
 test('Automation 2 stays frozen and unknown Automations 3 and 4 cannot be invented or activated', async () => {
   const recovery = JSON.parse(await readFile('config/automation-recovery.json', 'utf8'));
   assert.equal(validateAutomationRecovery(recovery), recovery);

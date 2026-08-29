@@ -3,7 +3,8 @@
   "artifacts": {
     "runs": { "path": "artifacts/runs", "maxAgeDays": 30, "maxItems": 100 },
     "logs": { "path": "artifacts/logs", "maxAgeDays": 14, "maxItems": 250 },
-    "screenshots": { "path": "artifacts/screenshots", "maxAgeDays": 14, "maxItems": 100 }
+    "screenshots": { "path": "artifacts/screenshots", "maxAgeDays": 14, "maxItems": 100 },
+    "podPreflights": { "path": "artifacts/pod-preflights", "maxAgeDays": 90, "maxItems": 200 }
   },
   "deletionMode": "local-generated-only"
 }

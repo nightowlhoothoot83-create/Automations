@@ -5,6 +5,7 @@
     { "id": "operations-weekly", "cron": "17 3 * * 1", "workerId": "automation-6", "targetSelectors": [], "enabled": true, "mode": "read-only", "overlapPolicy": "skip" },
     { "id": "regression-nightly-template", "cron": "43 2 * * *", "workerId": "automation-2", "targetSelectors": [], "enabled": false, "mode": "read-only", "overlapPolicy": "skip" },
     { "id": "health-hourly-template", "cron": "11 * * * *", "workerId": "automation-5", "targetSelectors": [], "enabled": false, "mode": "read-only", "overlapPolicy": "skip" },
-    { "id": "seo-weekly-template", "cron": "29 4 * * 2", "workerId": "automation-1", "targetSelectors": [], "enabled": false, "mode": "read-only", "overlapPolicy": "skip" }
+    { "id": "seo-weekly-template", "cron": "29 4 * * 2", "workerId": "automation-1", "targetSelectors": [], "enabled": false, "mode": "read-only", "overlapPolicy": "skip" },
+    { "id": "pod-preflight-drift-template", "cron": "37 5 * * *", "workerId": "automation-6", "targetSelectors": [], "enabled": false, "mode": "read-only", "overlapPolicy": "skip" }
   ]
 }
