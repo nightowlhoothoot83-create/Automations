@@ -10,10 +10,11 @@
   "automations": [
     {
       "id": "automation-2",
-      "status": "externally-in-testing",
+      "status": "production-authority-guarded",
       "enabled": false,
-      "freezeReason": "Owner directed Codex to leave all three AdSense sites untouched while ChatGPT tests them",
-      "nextAction": "Wait for owner-provided test results or explicit follow-up"
+      "freezeReason": "Current production main and ADG-MONITOR-V4 are authoritative; older Automation 2 repairs are superseded where they conflict",
+      "authorityContract": "config/adsense-production-authority.json",
+      "nextAction": "Accept only focused additive fixes for remaining live contract-audit failures; stop when the full live audit is green"
     },
     {
       "id": "automation-3",

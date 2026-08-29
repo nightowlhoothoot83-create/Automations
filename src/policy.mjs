@@ -33,9 +33,22 @@ export function validateAutomationRecovery(manifest) {
       for (const field of ['original-objective', 'repository-or-service-owner', 'permission-contract', 'result-schema', 'test-fixtures', 'status-source']) if (!item.requiredBeforeActivation?.includes(field)) throw new Error(`${item.id} recovery is missing ${field}`);
       if (item.command || item.schedule || item.targets) throw new Error(`${item.id} cannot define execution details before scope recovery`);
     }
-    if (item.status === 'externally-in-testing' && item.enabled !== false) throw new Error(`${item.id} must remain frozen during external testing`);
+    if (['externally-in-testing', 'production-authority-guarded'].includes(item.status) && item.enabled !== false) throw new Error(`${item.id} must remain frozen during external testing or production-authority guarding`);
   }
   return manifest;
+}
+
+export function validateAdsenseProductionAuthority(contract) {
+  if (contract?.schemaVersion !== '1.0.0' || contract.mode !== 'read-only-guard' || contract.sourceOfTruth !== 'current-production-main') throw new Error('Unsupported AdSense production authority contract');
+  if (contract.baselineMutationAllowed !== false) throw new Error('AdSense baseline mutation must remain forbidden');
+  for (const step of ['fetch-current-main', 'compare-branch-to-current-main', 'preserve-all-newer-commits', 'apply-only-additive-focused-fixes', 'stop-when-full-live-audit-is-green']) if (!contract.workflow.includes(step)) throw new Error(`Missing AdSense workflow guard: ${step}`);
+  const sites = new Map(contract.sites.map((item) => [item.id, item]));
+  if (sites.get('mycalctools')?.minimumToolCount !== 55 || !sites.get('mycalctools')?.forbid.includes('tool-count-reduction')) throw new Error('MyCalcTools preservation contract is incomplete');
+  if (!sites.get('mycalendartools')?.forbid.includes('thin-or-generic-content-restoration')) throw new Error('MyCalendarTools preservation contract is incomplete');
+  if (sites.get('wheelnamepicker')?.minimumKnownRepairCommit !== 'e3e99b193223c402b86b871a9af1966b54927386' || !sites.get('wheelnamepicker')?.forbid.includes('older-worker-overwrite')) throw new Error('WheelNamePicker authority is incomplete');
+  if (contract.monitor?.minimumKnownFixCommit !== 'bcbf694cd43eecad529751e1f378c9bbbc4476d6' || !contract.monitor.forbid.includes('contract-weakening') || !contract.monitor.forbid.includes('automatic-baseline-save-or-replacement')) throw new Error('ADG monitor authority is incomplete');
+  if (contract.completionGate?.onPass !== 'stable-for-now-ready-for-adsense-resubmission' || !contract.completionGate.required.includes('zero-known-live-production-failures')) throw new Error('AdSense completion gate is incomplete');
+  return contract;
 }
 
 export function validateIntegrationReconciliation(manifest) {

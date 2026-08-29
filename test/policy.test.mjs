@@ -1,5 +1,5 @@
 import test from 'node:test'; import assert from 'node:assert/strict'; import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises'; import { tmpdir } from 'node:os'; import path from 'node:path';
-import { validateTargetSelection, validateSchedules, validateAutomationRecovery, validateIntegrationReconciliation, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
+import { validateTargetSelection, validateSchedules, validateAutomationRecovery, validateIntegrationReconciliation, validateAdsenseProductionAuthority, validateSaasVerificationContract, planRetention, applyRetention, routeApproval } from '../src/policy.mjs';
 
 test('discovered candidates cannot be silently selected', () => {
   const inventory = { schemaVersion: '1.0.0', targets: [{ id: 'candidate', selection: 'candidate' }, { id: 'approved', selection: 'approved' }] };
@@ -22,13 +22,23 @@ test('POD monitoring schedule stays disabled and its local evidence has bounded 
 test('Automation 2 stays frozen and unknown Automations 3 and 4 cannot be invented or activated', async () => {
   const recovery = JSON.parse(await readFile('config/automation-recovery.json', 'utf8'));
   assert.equal(validateAutomationRecovery(recovery), recovery);
-  assert.equal(recovery.automations.find((item) => item.id === 'automation-2').status, 'externally-in-testing');
+  assert.equal(recovery.automations.find((item) => item.id === 'automation-2').status, 'production-authority-guarded');
   for (const id of ['automation-3', 'automation-4']) {
     const item = recovery.automations.find((candidate) => candidate.id === id);
     assert.equal(item.enabled, false); assert.equal(item.verifiedLocalBranch, null);
   }
   const unsafe = structuredClone(recovery); unsafe.automations.find((item) => item.id === 'automation-3').command = ['node', 'invented.mjs'];
   assert.throws(() => validateAutomationRecovery(unsafe), /cannot define execution details/);
+});
+
+test('current AdSense mains and hardened ADG monitor supersede stale Automation 2 repairs', async () => {
+  const authority = JSON.parse(await readFile('config/adsense-production-authority.json', 'utf8'));
+  assert.equal(validateAdsenseProductionAuthority(authority), authority);
+  assert.equal(authority.baselineMutationAllowed, false);
+  assert.equal(authority.sites.find((item) => item.id === 'wheelnamepicker').minimumKnownRepairCommit, 'e3e99b193223c402b86b871a9af1966b54927386');
+  assert.equal(authority.monitor.minimumKnownFixCommit, 'bcbf694cd43eecad529751e1f378c9bbbc4476d6');
+  const unsafe = structuredClone(authority); unsafe.baselineMutationAllowed = true;
+  assert.throws(() => validateAdsenseProductionAuthority(unsafe), /must remain forbidden/);
 });
 
 test('integration reconciliation preserves live-vs-snapshot provenance and blocks the stale integrated branch', async () => {

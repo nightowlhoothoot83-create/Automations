@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0.0",
+  "mode": "read-only-guard",
+  "sourceOfTruth": "current-production-main",
+  "baselineMutationAllowed": false,
+  "workflow": [
+    "fetch-current-main",
+    "compare-branch-to-current-main",
+    "preserve-all-newer-commits",
+    "apply-only-additive-focused-fixes",
+    "run-current-adg-monitor-contract",
+    "stop-when-full-live-audit-is-green"
+  ],
+  "sites": [
+    {
+      "id": "mycalctools",
+      "domain": "MyCalcTools.net",
+      "authoritativeRef": "main",
+      "minimumToolCount": 55,
+      "preserve": [
+        "bmi-and-calorie-redirect-cleanup",
+        "shell-bootstrap",
+        "approved-ascension-footer-and-logo",
+        "coloured-glow-visual-treatment",
+        "adsense-integrity-validation",
+        "unique-age-calculator-and-contact-content",
+        "worker-served-unique-calculator-content"
+      ],
+      "forbid": ["wholesale-reset", "older-worker-or-content-logic", "generic-content-restoration", "tool-count-reduction"]
+    },
+    {
+      "id": "mycalendartools",
+      "domain": "MyCalendarTools.net",
+      "authoritativeRef": "main",
+      "preserve": [
+        "redirect-cleanup",
+        "content-and-indexing-guards",
+        "unique-countdown-moon-zodiac-calendar-school-content",
+        "fathers-day-diwali-hanukkah-and-moon-accuracy-fixes",
+        "approved-header-footer-and-visual-system"
+      ],
+      "forbid": ["wholesale-reset", "thin-or-generic-content-restoration", "stale-branch-overwrite"]
+    },
+    {
+      "id": "wheelnamepicker",
+      "domain": "WheelNamePicker.com.au",
+      "authoritativeRef": "main",
+      "minimumKnownRepairCommit": "e3e99b193223c402b86b871a9af1966b54927386",
+      "preserve": [
+        "coin-dice-lucky-dip-route-loop-fixes",
+        "worker-clean-route-handling",
+        "index-normalization",
+        "approved-ascension-footer-and-logo",
+        "hero-logo-aspect-ratio-protection",
+        "coloured-glow-visual-shell-v2"
+      ],
+      "forbid": ["old-redirect-loop-behaviour", "older-worker-overwrite", "wholesale-reset"]
+    }
+  ],
+  "monitor": {
+    "id": "adg-monitor-v4",
+    "minimumKnownFixCommit": "bcbf694cd43eecad529751e1f378c9bbbc4476d6",
+    "preserveChecks": ["sitemap-pages", "critical-live-routes", "redirect-chains-and-loops", "canonicals", "internal-links", "visual-shell-markers", "approved-ascension-logo", "shared-css-js-contract-markers"],
+    "preserveFalsePositiveFixes": ["mycalc-dynamic-footer", "cloudflare-email-protection-links", "wheel-visual-shell-v2"],
+    "forbid": ["older-checker-replacement", "contract-weakening", "automatic-baseline-save-or-replacement"]
+  },
+  "completionGate": {
+    "required": ["full-live-contract-audit-green", "zero-known-live-production-failures"],
+    "onPass": "stable-for-now-ready-for-adsense-resubmission",
+    "onFailure": "focused-additive-repair-only"
+  }
+}
