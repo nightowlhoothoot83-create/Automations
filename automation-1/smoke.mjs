@@ -18,7 +18,12 @@ export async function checkTarget(target, fetchImpl = fetch) {
     const body = await response.text();
     let assertion = response.status === target.expectStatus;
     const notes = [];
+    const contentType = response.headers.get("content-type") || "";
     if (response.status !== target.expectStatus) notes.push(`expected HTTP ${target.expectStatus}, received ${response.status}`);
+    if (target.expectContentType && !contentType.toLowerCase().includes(target.expectContentType.toLowerCase())) {
+      assertion = false;
+      notes.push(`expected content-type containing ${target.expectContentType}, received ${contentType || "none"}`);
+    }
     if (target.expectText && !body.includes(target.expectText)) {
       assertion = false;
       notes.push(`response did not contain required marker: ${target.expectText}`);
@@ -40,6 +45,7 @@ export async function checkTarget(target, fetchImpl = fetch) {
       url: target.url,
       outcome: assertion ? "pass" : "fail",
       status: response.status,
+      contentType,
       durationMs: Math.round(performance.now() - started),
       startedAt,
       notes

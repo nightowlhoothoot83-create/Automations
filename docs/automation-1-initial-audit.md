@@ -43,3 +43,10 @@ These development commits are not deployed. They do not alter providers, credent
 To prove owner access, forms, real generation, workflow persistence, downloads, Stripe checkout boundaries, and provider publishing, Automation 1 needs a dedicated non-production test account/tenant and explicit approval for any operation that consumes credits or creates external platform drafts. No provider/model change is recommended from current evidence. If Gemini is desired as POD fallback, compare it against the healthy current Runware/Claude path for cost, quality, latency, and data handling before configuration; do not enable it without approval.
 
 Production approval is also required before deploying the Smart Cleaner web-SaaS shell fix (`767ca0e`), Content Creator identity fix (`e071085`), or Ad Manager documentation fix (`c5002d4`). Smart Cleaner `/app` requires a fresh deployed desktop/mobile retest before the visual baseline can be approved.
+
+## 29 August 2026 continuation evidence
+
+- The strengthened live contract now verifies response media types as well as status, body markers and JSON fields, preventing an HTML SPA fallback from passing as an API response. Automation tests pass 4/4 and all 12 deployed probes pass the added media-type checks.
+- Content Creator production still returns `{"service":"Raven Sharp Video Creator API","status":"ok"}` with HTTP 200 and `application/json`. Development fix `e071085` therefore remains undeployed and approval-gated.
+- Smart Cleaner web SaaS production `/app` returns HTTP 200 HTML and contains `class="rs-persistent-top"`, but the response still contains neither a `.rs-persistent-top` CSS rule nor the 44px `.rs-persistent-logo` constraint. Development fix `767ca0e` therefore remains undeployed; the known visual failure and unlocked-baseline decision remain current.
+- No production write, deployment, credential access, paid-provider operation, Automation 2 file, AdSense-site repository, or Smart Cleaner app repository was touched.

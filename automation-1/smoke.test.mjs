@@ -24,3 +24,13 @@ test("checkTarget fails a misleading HTML fallback for a JSON health endpoint", 
   assert.equal(result.outcome, "fail");
   assert.match(result.notes.join(" "), /valid JSON/);
 });
+
+test("checkTarget enforces the declared response content type", async () => {
+  const result = await checkTarget(
+    { id: "api", url: "https://example.invalid/api", expectStatus: 200, expectContentType: "application/json" },
+    async () => new Response("<html>fallback</html>", { status: 200, headers: { "content-type": "text/html" } })
+  );
+  assert.equal(result.outcome, "fail");
+  assert.equal(result.contentType, "text/html");
+  assert.match(result.notes.join(" "), /expected content-type/);
+});

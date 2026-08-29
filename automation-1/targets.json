@@ -1,16 +1,16 @@
 {
   "targets": [
-    { "id": "hub", "url": "https://raven-sharp.com/", "expectStatus": 200, "expectText": "Raven Sharp" },
-    { "id": "ad-manager-api", "url": "https://ads.raven-sharp.com/api/health", "expectStatus": 200, "expectJson": { "status": "ok" } },
-    { "id": "book-creator-api", "url": "https://books.raven-sharp.com/api/", "expectStatus": 200, "expectJson": { "status": "ok" } },
-    { "id": "content-creator-api", "url": "https://content.raven-sharp.com/api/", "expectStatus": 200, "expectJson": { "status": "ok" } },
-    { "id": "image-optimiser-api", "url": "https://raven-sharp-image-optimiser-and-upscaler-production.up.railway.app/api/health/detailed", "expectStatus": 200, "expectJson": { "status": "ok" } },
-    { "id": "pod-api", "url": "https://api.pod.raven-sharp.com/api/health/detailed", "expectStatus": 200, "expectJson": { "status": "ok" } },
-    { "id": "smart-cleaner-web", "url": "https://cleaner.raven-sharp.com/", "expectStatus": 200, "expectText": "Smart Cleaner" },
-    { "id": "ad-manager-auth-gate", "url": "https://ads.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectText": "Not authenticated" },
-    { "id": "book-creator-auth-gate", "url": "https://books.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectText": "Not authenticated" },
-    { "id": "content-creator-auth-gate", "url": "https://content.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectText": "Not authenticated" },
-    { "id": "image-optimiser-auth-gate", "url": "https://raven-sharp-image-optimiser-and-upscaler-production.up.railway.app/api/auth/me", "expectStatus": 401, "expectText": "Not authenticated" },
-    { "id": "pod-auth-gate", "url": "https://api.pod.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectText": "Not authenticated" }
+    { "id": "hub", "url": "https://raven-sharp.com/", "expectStatus": 200, "expectContentType": "text/html", "expectText": "Raven Sharp" },
+    { "id": "ad-manager-api", "url": "https://ads.raven-sharp.com/api/health", "expectStatus": 200, "expectContentType": "application/json", "expectJson": { "status": "ok" } },
+    { "id": "book-creator-api", "url": "https://books.raven-sharp.com/api/", "expectStatus": 200, "expectContentType": "application/json", "expectJson": { "status": "ok" } },
+    { "id": "content-creator-api", "url": "https://content.raven-sharp.com/api/", "expectStatus": 200, "expectContentType": "application/json", "expectJson": { "status": "ok" } },
+    { "id": "image-optimiser-api", "url": "https://raven-sharp-image-optimiser-and-upscaler-production.up.railway.app/api/health/detailed", "expectStatus": 200, "expectContentType": "application/json", "expectJson": { "status": "ok" } },
+    { "id": "pod-api", "url": "https://api.pod.raven-sharp.com/api/health/detailed", "expectStatus": 200, "expectContentType": "application/json", "expectJson": { "status": "ok" } },
+    { "id": "smart-cleaner-web", "url": "https://cleaner.raven-sharp.com/", "expectStatus": 200, "expectContentType": "text/html", "expectText": "Smart Cleaner" },
+    { "id": "ad-manager-auth-gate", "url": "https://ads.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectContentType": "application/json", "expectText": "Not authenticated" },
+    { "id": "book-creator-auth-gate", "url": "https://books.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectContentType": "application/json", "expectText": "Not authenticated" },
+    { "id": "content-creator-auth-gate", "url": "https://content.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectContentType": "application/json", "expectText": "Not authenticated" },
+    { "id": "image-optimiser-auth-gate", "url": "https://raven-sharp-image-optimiser-and-upscaler-production.up.railway.app/api/auth/me", "expectStatus": 401, "expectContentType": "application/json", "expectText": "Not authenticated" },
+    { "id": "pod-auth-gate", "url": "https://api.pod.raven-sharp.com/api/auth/me", "expectStatus": 401, "expectContentType": "application/json", "expectText": "Not authenticated" }
   ]
 }
