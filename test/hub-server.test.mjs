@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
+import { readFile } from 'node:fs/promises';
 import { createHubServer } from '../src/hub/server.mjs';
 
 async function withServer(run){const server=createHubServer();server.listen(0,'127.0.0.1');await once(server,'listening');const {port}=server.address();try{await run(`http://127.0.0.1:${port}`);}finally{server.close();await once(server,'close');}}
@@ -14,3 +15,11 @@ test('hub returns actionable client errors without mutating state',async()=>with
   const invalidDecision=await fetch(`${base}/api/decisions`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:'x',decision:'ship-it'})});assert.equal(invalidDecision.status,400);assert.deepEqual(await invalidDecision.json(),{error:'Invalid approval decision'});
   const method=await fetch(`${base}/styles.css`,{method:'POST'});assert.equal(method.status,405);
 }));
+
+test('latest run UI labels pass rate and evidence provenance explicitly', async () => {
+  const app = await readFile(new URL('../src/hub/public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /Pass rate/);
+  assert.match(app, /run\.provenance/);
+  assert.match(app, /passed \/ executed/);
+  assert.doesNotMatch(app, /passed \+ run\.summary\.skipped/);
+});
