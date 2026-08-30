@@ -21,17 +21,15 @@ Evidence directory: `artifacts/automation-1/visual-2026-08-22T01-01-40-820Z/` (i
 | Content Creator studio entry | Persistent Raven Sharp / Content Creator identity | Correct persistent header and product name. | Pass | None | None | `content-studio-desktop-top-verified.png`, `content-studio-mobile-top-verified.png` | No overflow/errors at either width |
 | Ad Manager public/auth | Raven Sharp top-left; `AD MANAGER`; centred mark; shared footer; mobile remains readable | Correct lockup, centred mark, CTA stack, campaign imagery and footer. Login/register forms exist without replacing brand shell. | Pass | None | None | `ads-desktop-top-verified.png`, `ads-mobile-correct-top.png`, `ads-desktop-footer-final.png`, `ads-mobile-footer-final.png` | 1280 and 390 pass; no overflow/errors |
 | Smart Cleaner public web SaaS | Raven Sharp top-left; `SMART CLEANER`; centred mark; shared footer; responsive CTAs | Correct lockup, centre mark, imagery, buttons and footer. | Pass | None | None | `cleaner-desktop-top-verified.png`, `cleaner-mobile-correct-top.png`, `cleaner-desktop-footer-final.png`, `cleaner-mobile-footer-final.png` | 1280 and 390 pass; no overflow/errors |
-| Smart Cleaner web-SaaS `/app` auth/workspace shell | Persistent top-left 44px Raven mark and Smart Cleaner label; no intrinsic-image overflow; responsive auth composition | **Deployed failure:** missing `.rs-persistent-*` CSS lets the 1536px logo render at intrinsic width, producing a 1536px document inside a 1265px viewport. | Fail pending deploy | Locked-shell CSS was referenced by markup but absent from `app.html`. | Added only the missing persistent-shell CSS on `codex/automation-1-smart-cleaner-shell`; no redesign and no separate Smart Cleaner app changes. | Deployed: `active-interface-data.json`. Fixed: `cleaner-app-local-fixed-desktop.png`, `cleaner-app-local-fixed-mobile.png` | Local pass: logo 44×44; 1265/1265 desktop and 375/375 mobile document widths; no overflow |
+| Smart Cleaner web-SaaS `/app` auth/workspace shell | Persistent top-left 44px Raven mark and Smart Cleaner label; no intrinsic-image overflow; responsive auth composition | Correct persistent header, product label and responsive auth composition after approved Cloudflare publication. | Pass; baseline approval still pending | Prior missing `.rs-persistent-*` CSS is resolved in production. | Approved `767ca0e` integrated with current main as `486c35e`; rollback target `3fcd434`. No redesign or separate Smart Cleaner app change. | `artifacts/automation-1/post-deploy-smart-cleaner-486c35e/desktop-1280x720.png`, `mobile-390x844.png` | Live pass: logo 44×44; 1265/1265 desktop and 375/375 mobile document widths; no broken images, overflow, console warnings or errors |
 
 ## Gate decision
 
-The visual baseline is **not approved or locked**. Public landing pages and inspected sign-in/studio entries pass, but Smart Cleaner web SaaS `/app` still fails in production until the isolated development fix is reviewed, deployed with approval, and retested on the deployed URL.
+The deployed visual gate now passes, including Smart Cleaner web SaaS `/app`. The visual baseline is still **not approved or locked** because baseline approval remains an explicit owner action separate from deployment and verification.
 
 ## Remaining approval queue
 
-1. Owner reviews Smart Cleaner web-SaaS commit `767ca0e` on `codex/automation-1-smart-cleaner-shell`.
-2. Owner authorises production deployment through the normal repository workflow.
-3. Automation 1 reruns fresh deployed `/app` screenshots at 1280×720 and 390×844, verifies the 44×44 top-left mark, product label, auth/workspace shell, footer, console, and zero overflow.
-4. Only after that deployed retest passes may the owner approve or lock the visual baseline.
+1. Owner reviews the fresh deployed Smart Cleaner evidence for integration commit `486c35e`.
+2. Owner may explicitly approve or lock the visual baseline if the evidence is accepted.
 
 No shared component, provider, model, paid service, credential, production deployment, or separate Smart Cleaner app repository was changed.
