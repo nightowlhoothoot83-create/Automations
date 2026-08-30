@@ -7,7 +7,7 @@ import { buildDashboard, recordDecision } from '../src/hub/model.mjs';
 
 test('hub builds a safe demonstration dashboard without run artifacts', { concurrency:false }, async () => {
   const cwd = process.cwd(); const directory = await mkdtemp(join(tmpdir(), 'ascension-hub-'));
-  try { process.chdir(directory); const dashboard = await buildDashboard(); assert.equal(dashboard.mode, 'demonstration'); assert.equal(dashboard.schemaVersion, '1.0.0'); assert.ok(dashboard.nextApproval); assert.ok(dashboard.nextTask); }
+  try { process.chdir(directory); const dashboard = await buildDashboard(); assert.equal(dashboard.mode, 'demonstration'); assert.equal(dashboard.schemaVersion, '1.0.0'); assert.ok(dashboard.nextApproval); assert.equal(dashboard.nextTask, null); assert.ok(dashboard.overview.attention > 0); }
   finally { process.chdir(cwd); }
 });
 

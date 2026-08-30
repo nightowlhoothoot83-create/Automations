@@ -78,6 +78,9 @@ export async function buildDashboard() {
   const workerApprovals = extraWorkers.flatMap((worker) => worker.report.approvals.map((item) => ({ ...item, priority: 3, provenance: worker.mode, workerId: worker.workerId })));
   const evidenceApprovals = snapshots.flatMap((snapshot)=>snapshot.approvalItems.map((item)=>({...item,priority:4,provenance:'snapshot',sourceRef:snapshot.sourceRef,workerId:snapshot.source})));
   const openApprovals = [...report.approvals.map((item) => ({ ...item, priority: 0, provenance: realReport ? 'live' : 'fixture', workerId:'automation-6' })), ...sourceApprovals, ...workerApprovals, ...evidenceApprovals].filter((item) => !decisions[item.id]).map(reviewApproval).sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+  const approvedDeployment = realReport && report.status === 'passed' && report.source?.kind === 'manual-local-recheck'
+    ? report.approvals.map((item)=>reviewApproval({...item,provenance:'live',workerId:'automation-6'})).find((item)=>decisions[item.id]==='approved' && item.approvalEligible && item.id.startsWith('deploy-management-hub-')) || null
+    : null;
   const repairs = (sources.repairs?.items || []).map((item) => ({ ...item, provenance: sources.repairs.mode }));
   const work = [
     ...report.results.filter((item) => ['failed', 'warning'].includes(item.status)).map((item) => ({ id: item.id, title: resultTitle(item), status: item.status, detail: item.evidence.summary || item.evidence.warning || 'Review captured test evidence.', rank: priority(item.status), provenance: realReport ? 'live' : 'fixture' })),
@@ -94,11 +97,12 @@ export async function buildDashboard() {
     schemaVersion: REPORT_VERSION, generatedAt: new Date().toISOString(), mode: realReport && sourceModes.every((mode) => mode === 'live') && extraWorkers.every((worker) => worker.mode === 'live') && snapshots.length===0 ? 'live' : realReport ? 'mixed' : 'demonstration', source: realReport ? 'automation-6/report-v1 + configured adapters' : 'demonstration report + configured fixture/snapshot adapters', sourceWarnings:[...sourceWarnings,...workerWarnings,...historyWarnings,...evidenceWarnings],
     overview: { status: report.status, ...report.summary, approvals: openApprovals.length, attention: work.length },
     nextApproval: openApprovals[0] || null,
-    nextTask: work[0] || null,
+    nextTask: work.find((item) => item.provenance === 'live') || null,
     businesses: [{ id: 'ascension-digital', name: 'Ascension Digital', type: 'Portfolio', status: report.status, projects: 3 }, { id: 'raven-sharp', name: 'Raven Sharp', type: 'Website', status: report.results.some((item) => item.id.includes('raven') && item.status === 'failed') ? 'failed' : 'passed', projects: 1 }],
     runs: [{ id: report.runId, automation: 'Automation 6', status: report.status, startedAt: report.startedAt, finishedAt: report.finishedAt, summary: report.summary, provenance:realReport ? 'live' : 'fixture' }, ...extraWorkers.map((worker) => ({ id:worker.report.runId, automation:worker.label, workerId:worker.workerId, status:worker.report.status, startedAt:worker.report.startedAt, finishedAt:worker.report.finishedAt, summary:worker.report.summary, provenance:worker.mode }))],
     activity: [...historyEvents.map((event) => ({ id:event.eventId, title:event.title, kind:event.type, status:event.decision === 'approved' ? 'passed' : 'warning', at:event.recordedAt, durationMs:0, evidence:{ decision:event.decision, approvalId:event.approvalId, actor:event.actor }, provenance:'local' })), ...report.results.map((item) => ({ id: item.id, title: resultTitle(item), kind: item.kind, status: item.status, at: item.startedAt, durationMs: item.durationMs, evidence: item.evidence, provenance:realReport ? 'live' : 'fixture' })), ...extraWorkers.flatMap((worker) => worker.report.results.map((item) => ({ id:item.id, title:resultTitle(item), kind:item.kind, status:item.status, at:item.startedAt, durationMs:item.durationMs, evidence:item.evidence, provenance:worker.mode, workerId:worker.workerId })))].sort((a,b)=>b.at.localeCompare(a.at)),
     approvals: openApprovals,
+    approvedDeployment,
     runReviews: [reviewRun(report,'Automation 6',realReport ? 'live-artifact' : 'fixture','automation-6'), ...extraWorkers.map((worker)=>reviewRun(worker.report,worker.label,worker.mode,worker.workerId))].filter(Boolean),
     decisionHistory: historyEvents.filter((event) => event.type === 'approval-decision'),
     evidenceCoverage:{state:realReport?'live-plus-snapshots':'snapshot-only',canonicalLiveAvailable:Boolean(realReport),snapshots:snapshots.map((snapshot)=>({source:snapshot.source,sourceId:snapshot.sourceId,capturedAt:snapshot.capturedAt,sourceRef:snapshot.sourceRef,mode:snapshot.mode,items:snapshot.items})),snapshotItemCount:snapshots.reduce((count,snapshot)=>count+snapshot.items.length,0)},
@@ -120,4 +124,19 @@ export async function recordDecision(id, decision) {
   await writeFile(path, JSON.stringify({ ...current, [id]: decision }, null, 2));
   const event = await appendHistory({ type:'approval-decision', title:`Approval ${decision}: ${id}`, approvalId:id, decision, actor:'local-owner', provenance:'local' });
   return { id, decision, recordedAt: event.recordedAt, eventId:event.eventId, note: 'Decision recorded locally; no deployment or production mutation was executed.' };
+}
+
+export async function getApprovedHubDeployment(id) {
+  if (typeof id !== 'string' || !id.startsWith('deploy-management-hub-')) throw new Error('Invalid Management Hub deployment approval');
+  const report = await loadReport();
+  if (!report) throw new Error('Deployment execution requires current live Automation 6 evidence');
+  const decisions = await readJson(decisionsPath(), {});
+  if (decisions[id] !== 'approved') throw new Error('Deployment execution requires a recorded owner approval');
+  const sourceApproval = report.approvals.find((item) => item.id === id);
+  if (!sourceApproval) throw new Error('Approved deployment is not present in the latest live report');
+  const approval = reviewApproval({ ...sourceApproval, provenance:'live', workerId:'automation-6' });
+  if (approval.action !== 'Approve Management Hub deployment handoff') throw new Error('Approval is not for the allowlisted Management Hub deployment');
+  if (report.status !== 'passed' || report.source?.kind !== 'manual-local-recheck') throw new Error('Deployment execution requires a passed local Management Hub recheck');
+  if (!approval.approvalEligible) throw new Error(`Deployment execution blocked: ${approval.approvalBlockers.join('; ')}`);
+  return { approval, report };
 }

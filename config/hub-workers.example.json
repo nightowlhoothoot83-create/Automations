@@ -2,6 +2,6 @@
   "schemaVersion": "1.0.0",
   "workers": [
     { "id": "automation-6", "label": "Monitoring & QA", "enabled": true, "mode": "live", "contract": "automation-6/report-v1@1.0.0", "adapter": "hub-index", "path": "artifacts/hub/runs-v1.json" },
-    { "id": "automation-2", "label": "Content operations", "enabled": true, "mode": "fixture", "contract": "automation-6/report-v1@1.0.0", "adapter": "report-file", "path": "fixtures/hub/automation-2-report.json" }
+    { "id": "automation-2", "label": "Final review checks", "enabled": true, "mode": "fixture", "contract": "automation-6/report-v1@1.0.0", "adapter": "report-file", "path": "fixtures/hub/automation-2-report.json" }
   ]
 }

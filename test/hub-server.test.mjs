@@ -23,3 +23,12 @@ test('latest run UI labels pass rate and evidence provenance explicitly', async 
   assert.match(app, /passed \/ executed/);
   assert.doesNotMatch(app, /passed \+ run\.summary\.skipped/);
 });
+
+test('manual recheck is prominent and restricted to the local Hub', async () => {
+  const app = await readFile(new URL('../src/hub/public/app.js', import.meta.url), 'utf8');
+  const page = await readFile(new URL('../src/hub/public/index.html', import.meta.url), 'utf8');
+  assert.match(page, /id="recheck">Recheck now/);
+  assert.match(app, /fetch\('\/api\/recheck'/);
+  const response = await fetch('http://example.invalid/api/recheck', { method:'POST' }).catch(() => null);
+  assert.equal(response, null);
+});
