@@ -1,5 +1,13 @@
 # Automation 5: Ascension Digital Management Hub
 
+## Cloudflare Pages deployment
+
+The production Pages project is `ascension-automation-hub`. Git builds run `npm run build:pages` and publish `src/hub/public`; Pages Functions under `functions/` serve the API. The `HUB_DB` D1 binding points to the dedicated `ascension-automation-hub` database, whose schema is versioned under `migrations/`.
+
+The Pages build generates an immutable dashboard/worker evidence snapshot from the branch's configured sources. Request-time decisions and history use D1 prepared statements; the edge runtime never attempts to read local worktree paths. Local `npm run hub` behavior remains filesystem-backed for development.
+
+Do not make the Pages URL public until Cloudflare Access protects it. Production deployment and D1 migrations are separate approval-gated steps. A successful build does not approve evidence, provider actions, baselines or production repairs.
+
 ## MVP outcome
 
 The hub is a local-first owner dashboard for immediate operational triage. It highlights the next approval and highest-priority failed or warning result before showing portfolio health, run totals, test evidence, activity, and expandable operational modules.

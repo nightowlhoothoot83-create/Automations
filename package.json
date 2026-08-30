@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "check": "node --test",
+    "build:pages": "node scripts/build-hub-pages.mjs",
+    "pages:dev": "npm run build:pages && wrangler pages dev",
     "hub": "node src/hub/server.mjs",
     "automation:6": "node src/cli.mjs",
     "orchestrate:dry-run": "node src/orchestrate.mjs",
     "orchestrate": "node src/orchestrate.mjs --execute"
   },
-  "engines": { "node": ">=20" }
+  "engines": { "node": ">=20" },
+  "devDependencies": {
+    "wrangler": "4.127.1"
+  }
 }

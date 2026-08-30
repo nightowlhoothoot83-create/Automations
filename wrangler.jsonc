@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ascension-automation-hub",
+  "pages_build_output_dir": "./src/hub/public",
+  "compatibility_date": "2026-08-30",
+  "d1_databases": [
+    {
+      "binding": "HUB_DB",
+      "database_name": "ascension-automation-hub",
+      "database_id": "306dda3b-9d46-44bb-a578-a315ff5c6f48",
+      "migrations_dir": "./migrations"
+    }
+  ]
+}
