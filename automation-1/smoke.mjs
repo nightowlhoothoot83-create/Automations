@@ -55,11 +55,66 @@ export async function checkTarget(target, fetchImpl = fetch) {
   }
 }
 
+export function buildAutomation6Report(checks, runStartedAt, finishedAt, evidencePath) {
+  const results = checks.map(check => ({
+    id: check.id,
+    kind: check.id.endsWith("auth-gate") ? "auth-boundary" : "http-smoke",
+    status: check.outcome === "pass" ? "passed" : "failed",
+    startedAt: check.startedAt,
+    durationMs: check.durationMs,
+    evidence: {
+      url: check.url,
+      httpStatus: check.status ?? null,
+      contentType: check.contentType ?? null,
+      notes: check.notes
+    }
+  }));
+  results.push({
+    id: "credentialed-workflow-coverage",
+    kind: "coverage",
+    status: "warning",
+    startedAt: runStartedAt,
+    durationMs: 0,
+    evidence: {
+      reason: "Credential-free run cannot prove owner access, paid/provider operations, generation, persistence, exports, or downloads.",
+      gated: true
+    }
+  });
+  const failed = results.filter(result => result.status === "failed").length;
+  const warning = results.filter(result => result.status === "warning").length;
+  return {
+    schemaVersion: "1.0.0",
+    runId: `automation-1-${runStartedAt.replaceAll(":", "-")}`,
+    startedAt: runStartedAt,
+    finishedAt,
+    status: failed ? "failed" : warning ? "warning" : "passed",
+    summary: {
+      passed: results.filter(result => result.status === "passed").length,
+      warning,
+      failed,
+      skipped: results.filter(result => result.status === "skipped").length
+    },
+    results,
+    approvals: [],
+    reviewPackage: {
+      capturedAt: finishedAt,
+      evidenceStatus: failed ? "failed" : warning ? "warning" : "passed",
+      knownFailures: failed,
+      evidenceRefs: [{ label: "Automation 1 credential-free smoke evidence", url: evidencePath.replaceAll("\\", "/") }],
+      provenance: "live-read-only",
+      approvalRequested: false
+    }
+  };
+}
+
 async function main() {
   const configPath = resolve(process.argv[2] || "automation-1/targets.json");
   const outputPath = resolve(process.argv[3] || "artifacts/automation-1/smoke.json");
+  const reportPath = resolve(process.argv[4] || "artifacts/automation-1/report-v1.json");
   const config = JSON.parse(await readFile(configPath, "utf8"));
+  const runStartedAt = new Date().toISOString();
   const checks = await Promise.all(config.targets.map(target => checkTarget(target)));
+  const finishedAt = new Date().toISOString();
   const report = {
     schemaVersion: 1,
     automation: "raven-sharp-saas-autonomous-qa-repair",
@@ -73,6 +128,9 @@ async function main() {
   };
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`);
+  const automation6Report = buildAutomation6Report(checks, runStartedAt, finishedAt, outputPath);
+  await mkdir(dirname(reportPath), { recursive: true });
+  await writeFile(reportPath, `${JSON.stringify(automation6Report, null, 2)}\n`);
   console.log(JSON.stringify(report.summary));
   process.exitCode = report.summary.fail ? 1 : 0;
 }

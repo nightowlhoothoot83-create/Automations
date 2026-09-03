@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { checkTarget, containsExpectedJson } from "./smoke.mjs";
+import { buildAutomation6Report, checkTarget, containsExpectedJson } from "./smoke.mjs";
 
 test("containsExpectedJson only requires declared health fields", () => {
   assert.equal(containsExpectedJson({ status: "ok", extra: true }, { status: "ok" }), true);
@@ -33,4 +33,18 @@ test("checkTarget enforces the declared response content type", async () => {
   assert.equal(result.outcome, "fail");
   assert.equal(result.contentType, "text/html");
   assert.match(result.notes.join(" "), /expected content-type/);
+});
+
+test("Automation 6 report adapter preserves failures and marks gated coverage", () => {
+  const startedAt = "2026-08-30T00:00:00.000Z";
+  const report = buildAutomation6Report([
+    { id: "hub", url: "https://example.invalid", outcome: "fail", status: 503, contentType: "text/html", durationMs: 5, startedAt, notes: ["unavailable"] }
+  ], startedAt, "2026-08-30T00:00:01.000Z", "artifacts/automation-1/smoke.json");
+
+  assert.equal(report.schemaVersion, "1.0.0");
+  assert.equal(report.status, "failed");
+  assert.deepEqual(report.summary, { passed: 0, warning: 1, failed: 1, skipped: 0 });
+  assert.equal(report.reviewPackage.knownFailures, 1);
+  assert.equal(report.reviewPackage.provenance, "live-read-only");
+  assert.equal(report.results.at(-1).id, "credentialed-workflow-coverage");
 });
