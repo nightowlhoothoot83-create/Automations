@@ -15,7 +15,7 @@ async function performRecheck(origin) {
   const startedAt = new Date().toISOString();
   const runId = `${startedAt.replace(/[:.]/g, '-')}-${process.pid}`;
   const results = await checkTarget({ id:'management-hub', url:`${url.origin}/`, checks:['health','seo'] }, { timeoutMs:10000, maxBodyBytes:1000000 });
-  results.push(await runCommand({ id:'management-hub-tests', kind:'regression', executable:process.execPath, args:['--test'], timeoutMs:300000 }, process.cwd()));
+  results.push(await runCommand({ id:'management-hub-tests', kind:'regression', executable:process.execPath, args:['--test'], timeoutMs:300000, unsetEnv:['HUB_RUN_INDEX_PATH'] }, process.cwd()));
   const summary = { passed:0, warning:0, failed:0, skipped:0 };
   for (const item of results) summary[item.status]++;
   const status = summary.failed ? 'failed' : summary.warning ? 'warning' : 'passed';

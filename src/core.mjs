@@ -78,7 +78,12 @@ function attribute(tag, name) { return tag?.match(new RegExp(`\\b${name}\\s*=\\s
 export function runCommand(command, cwd) {
   const startedAt = new Date().toISOString(); const start = performance.now();
   return new Promise((resolve) => {
-    const child = spawn(command.executable, command.args, { cwd, shell: false, env: { ...process.env, CI: 'true' }, windowsHide: true });
+    const env = { ...process.env, CI:'true' };
+    for (const name of command.unsetEnv || []) {
+      if (name !== 'HUB_RUN_INDEX_PATH') throw new Error(`Command ${command.id} cannot unset environment variable ${name}`);
+      delete env[name];
+    }
+    const child = spawn(command.executable, command.args, { cwd, shell: false, env, windowsHide: true });
     let stdout = '', stderr = ''; const cap = 200000;
     child.stdout.on('data', (d) => { stdout = (stdout + d).slice(-cap); }); child.stderr.on('data', (d) => { stderr = (stderr + d).slice(-cap); });
     const timer = setTimeout(() => child.kill(), command.timeoutMs ?? 300000);
