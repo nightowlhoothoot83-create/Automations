@@ -46,5 +46,6 @@ test("Automation 6 report adapter preserves failures and marks gated coverage", 
   assert.deepEqual(report.summary, { passed: 0, warning: 1, failed: 1, skipped: 0 });
   assert.equal(report.reviewPackage.knownFailures, 1);
   assert.equal(report.reviewPackage.provenance, "live-read-only");
+  assert.equal(report.reviewPackage.evidenceRefs[0].url, "/#worker-evidence");
   assert.equal(report.results.at(-1).id, "credentialed-workflow-coverage");
 });

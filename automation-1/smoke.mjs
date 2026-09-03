@@ -100,7 +100,7 @@ export function buildAutomation6Report(checks, runStartedAt, finishedAt, evidenc
       capturedAt: finishedAt,
       evidenceStatus: failed ? "failed" : warning ? "warning" : "passed",
       knownFailures: failed,
-      evidenceRefs: [{ label: "Automation 1 credential-free smoke evidence", url: evidencePath.replaceAll("\\", "/") }],
+      evidenceRefs: [{ label: "Automation 1 credential-free smoke evidence", url: "/#worker-evidence", sourcePath: evidencePath }],
       provenance: "live-read-only",
       approvalRequested: false
     }
