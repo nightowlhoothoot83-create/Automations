@@ -20,6 +20,8 @@ The hub API response is a presentation view, not a worker reporting contract. Ma
 
 When Automation 6 runs from another checkout or worktree, set `HUB_RUN_INDEX_PATH` to its absolute `artifacts/hub/runs-v1.json` path before starting the Hub. Report paths remain sourced from that versioned index; the Hub does not copy, rewrite, or promote them.
 
+Report-file workers can be connected across isolated worktrees with `HUB_<AUTOMATION_ID>_REPORT_PATH` (hyphens become underscores), for example `HUB_AUTOMATION_1_REPORT_PATH`. Missing files degrade visibly and never become a pass.
+
 ## Modular source adapters
 
 `schemas/hub-source-v1.schema.json` defines a small Automation 5-owned envelope for content, assets, finance, repairs, and approval queues. `config/hub-sources.example.json` configures JSON-file adapters; real integrations can replace paths using `HUB_SOURCES_CONFIG` without changing the UI. Every envelope must declare `mode: live` or `mode: fixture`, and the dashboard exposes that provenance.
