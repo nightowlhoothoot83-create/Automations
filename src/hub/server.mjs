@@ -7,6 +7,7 @@ import { exportHistory, importHistory, retainHistory } from './history.mjs';
 import { loadWorkerRunDetails } from './workers.mjs';
 import { runHubRecheck } from './recheck.mjs';
 import { executeApprovedHubDeploy } from './execution.mjs';
+import { listRepairRequests, recordRepairRequest } from './repairs.mjs';
 
 const root = resolve('src/hub/public');
 const port = Number(process.env.HUB_PORT || 4175);
@@ -21,6 +22,8 @@ export async function handleRequest(request,response){
     if (pathname === '/api/dashboard' && request.method === 'GET') return send(response, 200, JSON.stringify(await buildDashboard()));
     if (pathname === '/api/recheck' && request.method === 'POST') return send(response,200,JSON.stringify(await runHubRecheck(`http://${request.headers.host}`)));
     if (pathname === '/api/deployments/execute' && request.method === 'POST') return send(response,200,JSON.stringify(await executeApprovedHubDeploy(await readBody(request))));
+    if (pathname === '/api/repairs' && request.method === 'GET') return send(response,200,JSON.stringify(await listRepairRequests()));
+    if (pathname === '/api/repairs' && request.method === 'POST') return send(response,200,JSON.stringify(await recordRepairRequest(await readBody(request))));
     if (pathname === '/api/history/export' && request.method === 'GET') return send(response,200,JSON.stringify(await exportHistory(),null,2),'application/json; charset=utf-8');
     if (pathname === '/api/history/import' && request.method === 'POST') return send(response,200,JSON.stringify(await importHistory(await readBody(request))));
     if (pathname === '/api/history/retention' && request.method === 'POST') { const input=await readBody(request); return send(response,200,JSON.stringify(await retainHistory(input.keep ?? 500))); }

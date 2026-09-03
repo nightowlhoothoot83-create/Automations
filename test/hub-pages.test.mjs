@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { onRequestPost as recordDecision } from '../functions/api/decisions.js';
+import { onRequestPost as recordRepair, onRequestGet as getRepairs } from '../functions/api/repairs.js';
 import { onRequestGet as getDashboard } from '../functions/api/dashboard.js';
 
 function fakeDb(decisions = []) {
@@ -36,4 +37,10 @@ test('Pages decision endpoint validates input and writes decision plus history a
   assert.equal(response.status, 200);
   assert.equal(db.calls.length, 2);
   assert.match(db.calls[0].sql, /ON CONFLICT/);
+});
+
+test('Pages repair intake records branch-only work with a locked deployment gate',async()=>{
+  const db=fakeDb(); const request=new Request('https://hub.test/api/repairs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({target:'pod-suite',kind:'repair',summary:'Preserve artwork in previews',details:'Use the exact approved source artwork in every product mockup.'})});
+  const response=await recordRepair({request,env:{HUB_DB:db}}); assert.equal(response.status,200); const body=await response.json(); assert.equal(body.request.deploymentGate,'blocked-until-all-tests-pass'); assert.match(db.calls[0].sql,/history_events/);
+  const listing=await getRepairs({env:{HUB_DB:fakeDb([])}}); assert.equal(listing.status,200);
 });

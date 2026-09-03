@@ -32,3 +32,11 @@ test('manual recheck is prominent and restricted to the local Hub', async () => 
   const response = await fetch('http://example.invalid/api/recheck', { method:'POST' }).catch(() => null);
   assert.equal(response, null);
 });
+
+test('guarded repair requests validate scope and never execute code',async()=>withServer(async(base)=>{
+  const invalid=await fetch(`${base}/api/repairs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({target:'adsense',kind:'repair',summary:'bad',details:'too short'})});
+  assert.equal(invalid.status,400);
+  const response=await fetch(`${base}/api/repairs`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({target:'management-hub',kind:'edit',summary:'Add guarded repair intake',details:'Record branch work without executing production code.'})});
+  assert.equal(response.status,200); const body=await response.json(); assert.equal(body.request.deploymentGate,'blocked-until-all-tests-pass');
+  const list=await fetch(`${base}/api/repairs`).then((item)=>item.json()); assert.equal(list.requests[0].summary,'Add guarded repair intake');
+}));
