@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "automation:3": "node src/asset-inventory-cli.mjs",
     "check": "node --test",
     "automation:6": "node src/cli.mjs",
     "orchestrate:dry-run": "node src/orchestrate.mjs",
