@@ -6,11 +6,13 @@ pages_build_output_dir = "dist/hub"
 HUB_OWNER_EMAIL = "ascensiondigitalagency@outlook.com"
 HUB_RELEASE_REF = "main"
 
+[[d1_databases]]
+binding = "HUB_DB"
+database_name = "ascension-automation-hub"
+database_id = "306dda3b-9d46-44bb-a578-a315ff5c6f48"
+migrations_dir = "migrations"
+
 # Secrets are managed in the Cloudflare dashboard and must not be committed here:
 # GITHUB_CONTROL_TOKEN
 # HUB_SCHEDULER_KEY
 # HUB_OWNER_CONTROL_KEY
-#
-# HUB_DB is the existing Cloudflare Pages D1 binding to the
-# ascension-automation-hub database. It is intentionally not duplicated here
-# until its Cloudflare database_id is verified.
