@@ -6,6 +6,7 @@ test('Hub GitHub deployment validates before publishing to the existing Pages pr
   const workflow = await readFile('.github/workflows/deploy-management-hub.yml', 'utf8');
   assert.match(workflow, /npm run check[\s\S]+npm run build:pages[\s\S]+wrangler pages deploy/);
   assert.match(workflow, /project-name=ascension-automation-hub/);
+  assert.match(workflow, /branch=codex\/automation-5-management-hub/);
   assert.match(workflow, /environment: production/);
   assert.doesNotMatch(workflow, /wrangler pages project create/);
 });
