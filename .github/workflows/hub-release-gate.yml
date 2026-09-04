@@ -1,0 +1,240 @@
+name: Hub Check Test Preview Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Release stage to run"
+        required: true
+        default: check
+        type: choice
+        options:
+          - check
+          - test
+          - preview
+          - deploy
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ascension-hub-release
+  cancel-in-progress: false
+
+env:
+  HUB_EVIDENCE_URL: ${{ vars.HUB_EVIDENCE_URL }}
+  HUB_SCHEDULER_KEY: ${{ secrets.HUB_SCHEDULER_KEY }}
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/hub/public/app.js
+          node --check src/hub/public/owner-controls.js
+          node --check functions/_automation-control.js
+          node --check functions/_owner-auth.js
+          node --check functions/_release-control.js
+          node --check functions/api/automations.js
+          node --check functions/api/automation-action.js
+          node --check functions/api/release-action.js
+          node --check functions/api/release-evidence.js
+          node --check functions/api/release-state.js
+          node --check functions/api/scheduler.js
+      - name: Build Pages bundle
+        run: npm run build:pages
+      - name: Upload checked bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ascension-hub-check-${{ github.run_id }}
+          path: src/hub/public
+          retention-days: 7
+      - name: Report passing Check evidence
+        if: success()
+        continue-on-error: true
+        shell: bash
+        run: |
+          endpoint="${HUB_EVIDENCE_URL:-https://ascension-automation-hub.pages.dev/api/release-evidence}"
+          test -n "$HUB_SCHEDULER_KEY" || exit 0
+          jq -n --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{releaseSha:$sha,stage:"check",status:"success",runId:$run,runUrl:$url}' |
+            curl --fail-with-body --silent --show-error -X POST -H "Authorization: Bearer $HUB_SCHEDULER_KEY" -H "Content-Type: application/json" --data-binary @- "$endpoint"
+      - name: Report failed Check evidence
+        if: failure()
+        continue-on-error: true
+        shell: bash
+        run: |
+          endpoint="${HUB_EVIDENCE_URL:-https://ascension-automation-hub.pages.dev/api/release-evidence}"
+          test -n "$HUB_SCHEDULER_KEY" || exit 0
+          jq -n --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" '{releaseSha:$sha,stage:"check",status:"failed",runId:$run,runUrl:$url}' |
+            curl --silent --show-error -X POST -H "Authorization: Bearer $HUB_SCHEDULER_KEY" -H "Content-Type: application/json" --data-binary @- "$endpoint" || true
+
+  test:
+    name: Test
+    if: ${{ inputs.stage == 'test' || inputs.stage == 'preview' || inputs.stage == 'deploy' }}
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run complete test suite
+        run: npm run check
+      - name: Build exact tested bundle
+        run: npm run build:pages
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ascension-hub-test-${{ github.run_id }}
+          path: |
+            src/hub/public
+            artifacts/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Report Test evidence
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          endpoint="${HUB_EVIDENCE_URL:-https://ascension-automation-hub.pages.dev/api/release-evidence}"
+          test -n "$HUB_SCHEDULER_KEY" || exit 0
+          status="success"; test "${{ job.status }}" = "success" || status="failed"
+          jq -n --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --arg status "$status" '{releaseSha:$sha,stage:"test",status:$status,runId:$run,runUrl:$url}' |
+            curl --silent --show-error -X POST -H "Authorization: Bearer $HUB_SCHEDULER_KEY" -H "Content-Type: application/json" --data-binary @- "$endpoint" || true
+
+  preview:
+    name: Preview and screenshots
+    if: ${{ inputs.stage == 'preview' || inputs.stage == 'deploy' }}
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.MANAGEMENT_HUB }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Rebuild tested bundle
+        run: npm run build:pages
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing MANAGEMENT_HUB repository secret"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID repository secret"; exit 1; }
+      - name: Deploy Cloudflare Pages preview
+        id: preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler pages deploy src/hub/public --project-name=ascension-automation-hub --branch=preview 2>&1 | tee preview-deploy.log
+          preview_url="$(grep -Eo 'https://[^ ]+\.pages\.dev' preview-deploy.log | tail -1 || true)"
+          test -n "$preview_url" || { echo "Could not capture preview URL"; exit 1; }
+          printf '%s\n' "$preview_url" > preview-url.txt
+          echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+      - name: Capture desktop and mobile review screenshots
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p screenshots
+          npx -y playwright@1.55.0 install --with-deps chromium
+          npx -y playwright@1.55.0 screenshot --device="Desktop Chrome" --full-page "$PREVIEW_URL" screenshots/hub-desktop.png
+          npx -y playwright@1.55.0 screenshot --device="iPhone 13" --full-page "$PREVIEW_URL" screenshots/hub-mobile.png
+          test -s screenshots/hub-desktop.png
+          test -s screenshots/hub-mobile.png
+      - name: Preview link in run summary
+        run: |
+          echo "### Review this preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.preview.outputs.preview_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Desktop and mobile screenshots are attached in the preview evidence artifact." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload preview and screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ascension-hub-preview-${{ github.run_id }}
+          path: |
+            preview-url.txt
+            preview-deploy.log
+            screenshots/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Report Preview evidence
+        if: always()
+        continue-on-error: true
+        shell: bash
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.preview_url }}
+        run: |
+          endpoint="${HUB_EVIDENCE_URL:-https://ascension-automation-hub.pages.dev/api/release-evidence}"
+          test -n "$HUB_SCHEDULER_KEY" || exit 0
+          status="success"; test "${{ job.status }}" = "success" || status="failed"
+          screenshots=0
+          test -s screenshots/hub-desktop.png && screenshots=$((screenshots+1)) || true
+          test -s screenshots/hub-mobile.png && screenshots=$((screenshots+1)) || true
+          jq -n --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --arg preview "$PREVIEW_URL" --arg status "$status" --argjson screenshots "$screenshots" '{releaseSha:$sha,stage:"preview",status:$status,runId:$run,runUrl:$url,previewUrl:($preview|select(length>0)),screenshotCount:$screenshots,payload:{screenshots:["hub-desktop.png","hub-mobile.png"]}}' |
+            curl --silent --show-error -X POST -H "Authorization: Bearer $HUB_SCHEDULER_KEY" -H "Content-Type: application/json" --data-binary @- "$endpoint" || true
+
+  deploy:
+    name: Production deploy
+    if: ${{ inputs.stage == 'deploy' }}
+    needs: preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.MANAGEMENT_HUB }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Re-run complete tests immediately before production
+        run: npm run check
+      - name: Build production bundle
+        run: npm run build:pages
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing MANAGEMENT_HUB repository secret"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID repository secret"; exit 1; }
+      - name: Deploy production
+        run: npx wrangler pages deploy src/hub/public --project-name=ascension-automation-hub --branch=main
+      - name: Report Deploy evidence
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          endpoint="${HUB_EVIDENCE_URL:-https://ascension-automation-hub.pages.dev/api/release-evidence}"
+          test -n "$HUB_SCHEDULER_KEY" || exit 0
+          status="success"; test "${{ job.status }}" = "success" || status="failed"
+          jq -n --arg sha "$GITHUB_SHA" --arg run "$GITHUB_RUN_ID" --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --arg status "$status" '{releaseSha:$sha,stage:"deploy",status:$status,runId:$run,runUrl:$url}' |
+            curl --silent --show-error -X POST -H "Authorization: Bearer $HUB_SCHEDULER_KEY" -H "Content-Type: application/json" --data-binary @- "$endpoint" || true
