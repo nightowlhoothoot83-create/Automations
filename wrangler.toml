@@ -1,0 +1,16 @@
+name = "ascension-automation-hub"
+compatibility_date = "2026-09-04"
+pages_build_output_dir = "dist/hub"
+
+[vars]
+HUB_OWNER_EMAIL = "ascensiondigitalagency@outlook.com"
+HUB_RELEASE_REF = "main"
+
+# Secrets are managed in the Cloudflare dashboard and must not be committed here:
+# GITHUB_CONTROL_TOKEN
+# HUB_SCHEDULER_KEY
+# HUB_OWNER_CONTROL_KEY
+#
+# HUB_DB is the existing Cloudflare Pages D1 binding to the
+# ascension-automation-hub database. It is intentionally not duplicated here
+# until its Cloudflare database_id is verified.
