@@ -163,7 +163,7 @@ jobs:
           mkdir -p screenshots
           npx -y playwright@1.55.0 install --with-deps chromium
           npx -y playwright@1.55.0 screenshot --device="Desktop Chrome" --full-page "$PREVIEW_URL" screenshots/hub-desktop.png
-          npx -y playwright@1.55.0 screenshot --device="iPhone 13" --full-page "$PREVIEW_URL" screenshots/hub-mobile.png
+          npx -y playwright@1.55.0 screenshot --browser=chromium --viewport-size="390,844" --full-page "$PREVIEW_URL" screenshots/hub-mobile.png
           test -s screenshots/hub-desktop.png
           test -s screenshots/hub-mobile.png
       - name: Preview link in run summary
