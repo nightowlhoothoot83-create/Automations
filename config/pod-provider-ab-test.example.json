@@ -9,7 +9,10 @@
     "includeEvergreenControl": true,
     "styleCoverage": ["personal-handmade", "heritage-craft", "modern-maximalism", "surreal-dreamscape", "nostalgic", "playful-pattern"],
     "recordTrendEvidence": true,
-    "rejectCopiedOrProtectedContent": true
+    "rejectCopiedOrProtectedContent": true,
+    "compileStructuredArtDirection": true,
+    "minimumVisualComplexity": "authored-detailed-merchandise-illustration",
+    "automaticPromptAvoid": ["generic app icon", "flat clip art", "stock-vector look", "large blank areas", "generic AI aesthetic"]
   },
   "stageBenchmarks": [
     {
@@ -39,12 +42,16 @@
   },
   "providers": [
     { "id": "current-runware", "provider": "Runware", "model": null, "credentialEnv": "RUNWARE_API_KEY" },
-    { "id": "candidate-flux-schnell", "provider": "fal.ai", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" }
+    { "id": "candidate-flux-schnell", "provider": "fal.ai", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "role": "draft-only", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" },
+    { "id": "candidate-flux-pro-v1-1", "provider": "fal.ai", "model": "FLUX 1.1 Pro", "endpointId": "fal-ai/flux-pro/v1.1", "role": "final-artwork-default", "clientPackage": "@fal-ai/client", "credentialEnv": "FAL_KEY" }
   ],
   "analysis": {
     "provider": "Claude Vision",
     "blindProviderLabels": true,
-    "criteria": ["prompt-adherence", "composition", "text-quality", "visible-artifacts", "product-fit", "preview-quality", "template-dimensions", "effective-print-resolution", "transparency", "bleed-and-safe-area"],
+    "criteria": ["prompt-adherence", "style-specificity", "subject-readability", "composition", "colour-harmony", "detail-quality", "originality", "text-quality", "visible-artifacts", "product-fit", "preview-quality", "template-dimensions", "effective-print-resolution", "transparency", "bleed-and-safe-area"],
+    "minimumOverallScore": 80,
+    "automaticFailure": ["generic-clip-art", "generic-app-icon", "large-unintended-blank-area", "missing-requested-style", "visible-generation-artifact", "watermark-or-unrequested-text"],
+    "actionOnFailure": "reject-and-regenerate-with-targeted-correction",
     "operationalMetrics": ["latency", "cost-per-output", "failure-rate"]
   },
   "ownerReviewPresentation": {

@@ -70,10 +70,13 @@ test('six-product SaaS contract requires visual, functional, legal, backend and 
 
 test('POD provider benchmark is disabled and uses matched blind analysis', async () => {
   const benchmark = JSON.parse(await readFile('config/pod-provider-ab-test.example.json', 'utf8'));
-  assert.equal(benchmark.enabled, false); assert.equal(benchmark.providers.length, 2); assert.equal(benchmark.analysis.blindProviderLabels, true);
+  assert.equal(benchmark.enabled, false); assert.equal(benchmark.providers.length, 3); assert.equal(benchmark.analysis.blindProviderLabels, true);
   assert.ok(benchmark.providers.some((provider) => provider.credentialEnv === 'FAL_KEY')); assert.equal(benchmark.ownerReviewPresentation.createSideBySideImage, true); assert.equal(benchmark.ownerReviewPresentation.showRawRunwareOutput, true); assert.equal(benchmark.ownerReviewPresentation.showRawFluxOutput, true); assert.match(benchmark.selectionRule, /owner review/);
   assert.equal(benchmark.promptStrategy.primary, 'trend-informed-original-concept'); assert.equal(benchmark.promptStrategy.includeEvergreenControl, true); assert.equal(benchmark.promptStrategy.rejectCopiedOrProtectedContent, true);
   assert.equal(benchmark.stageBenchmarks.length, 2); assert.equal(benchmark.providerSelection.selectPerStage, true); assert.equal(benchmark.providerSelection.allowDifferentProvidersForArtworkAndPreview, true);
+  assert.equal(benchmark.providers.find((provider) => provider.id === 'candidate-flux-pro-v1-1').role, 'final-artwork-default');
+  assert.equal(benchmark.providers.find((provider) => provider.id === 'candidate-flux-schnell').role, 'draft-only');
+  assert.equal(benchmark.analysis.minimumOverallScore, 80); assert.ok(benchmark.analysis.automaticFailure.includes('generic-clip-art'));
   const preview = benchmark.stageBenchmarks.find((stage) => stage.id === 'product-preview-generation'); assert.match(preview.input, /binary-identical/); assert.equal(preview.preferredMethod, 'deterministic-provider-mockup-api-or-template-compositing'); assert.ok(preview.automaticFailure.includes('source-artwork-redrawn'));
 });
 
@@ -81,6 +84,15 @@ test('POD trend intelligence is current, attributable and originality gated', as
   const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8'));
   assert.equal(contract.podTrendIntelligence.enabledByDefault, true); assert.equal(contract.podTrendIntelligence.firstGenerationChoice, 'trend-informed-original-concept');
   assert.ok(contract.podTrendIntelligence.requiredEvidence.includes('captured-at')); assert.ok(contract.podTrendIntelligence.rules.some((rule) => /protected/.test(rule)));
+});
+
+test('POD final artwork uses structured prompts, Pro model and a rejection gate', async () => {
+  const contract = JSON.parse(await readFile('config/saas-verification-contract.json', 'utf8'));
+  const art = contract.podArtDirection;
+  assert.equal(art.finalArtworkModel, 'fal-ai/flux-pro/v1.1');
+  assert.equal(art.draftOnlyModel, 'fal-ai/flux-1/schnell');
+  assert.equal(art.minimumOverallReviewScore, 80);
+  assert.ok(art.automaticFailure.includes('missing-requested-style'));
 });
 
 test('Image Optimiser protects large fine-art jobs with physical-size and cost preflight', async () => {

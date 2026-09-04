@@ -16,10 +16,10 @@
       "connectionsRequired": ["fal-key-environment-variable", "webhook-endpoint"],
       "providerArchitecture": {
         "selectionMode": "independent-per-stage-after-benchmark",
-        "artworkGeneration": { "status": "pending-owner-review", "candidates": ["current Runware", "fal.ai FLUX.1 Schnell"] },
+        "artworkGeneration": { "status": "pending-owner-review", "default": "fal.ai FLUX 1.1 Pro", "candidates": ["current Runware", "fal.ai FLUX 1.1 Pro", "fal.ai FLUX.1 Schnell (draft only)"] },
         "previewGeneration": { "status": "pending-owner-review", "candidates": ["current Runware", "fal.ai FLUX.1 Schnell"] },
         "allowDifferentProviders": true,
-        "falCandidate": { "clientPackage": "@fal-ai/client", "model": "FLUX.1 Schnell", "endpointId": "fal-ai/flux-1/schnell", "credentialEnv": "FAL_KEY" }
+        "falCandidate": { "clientPackage": "@fal-ai/client", "model": "FLUX 1.1 Pro", "endpointId": "fal-ai/flux-pro/v1.1", "draftEndpointId": "fal-ai/flux-1/schnell", "credentialEnv": "FAL_KEY" }
       },
       "suitabilityAnalysisProvider": { "provider": "Claude Vision", "use": "analyse image suitability for the selected POD product", "change": "none" }
     }
@@ -60,6 +60,15 @@
       "Keep generated work in review until originality, print readiness, product fit and owner approval pass"
     ],
     "requiredEvidence": ["source-reference", "captured-at", "trend-summary", "target-audience", "target-product", "prompt-rationale", "originality-check", "saturation-assessment"]
+  },
+  "podArtDirection": {
+    "compileStructuredPrompt": true,
+    "finalArtworkModel": "fal-ai/flux-pro/v1.1",
+    "draftOnlyModel": "fal-ai/flux-1/schnell",
+    "requiredPromptSections": ["creative-brief", "art-direction", "composition", "production-finish", "output-isolation", "avoid"],
+    "minimumOverallReviewScore": 80,
+    "automaticFailure": ["generic-clip-art", "generic-app-icon", "large-unintended-blank-area", "missing-requested-style", "visible-generation-artifact", "watermark-or-unrequested-text"],
+    "failedOutputAction": "reject-and-regenerate-with-targeted-correction"
   },
   "imageOptimiserPrintSizing": {
     "physicalUnits": ["millimetres", "centimetres", "inches"],
