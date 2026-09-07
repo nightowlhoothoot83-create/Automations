@@ -7,7 +7,7 @@ import { exportHistory, importHistory, retainHistory } from './history.mjs';
 import { loadWorkerRunDetails } from './workers.mjs';
 import { runHubRecheck } from './recheck.mjs';
 import { executeApprovedHubDeploy } from './execution.mjs';
-import { listRepairRequests, recordRepairRequest } from './repairs.mjs';
+import { listRepairRequests, recordRepairRequest, updateRepairRequest } from './repairs.mjs';
 
 const root = resolve('src/hub/public');
 const port = Number(process.env.HUB_PORT || 4175);
@@ -24,13 +24,13 @@ export async function handleRequest(request,response){
     if (pathname === '/api/deployments/execute' && request.method === 'POST') return send(response,200,JSON.stringify(await executeApprovedHubDeploy(await readBody(request))));
     if (pathname === '/api/repairs' && request.method === 'GET') return send(response,200,JSON.stringify(await listRepairRequests()));
     if (pathname === '/api/repairs' && request.method === 'POST') return send(response,200,JSON.stringify(await recordRepairRequest(await readBody(request))));
+    const repairMatch=pathname.match(/^\/api\/repairs\/([a-f0-9-]+)\/status$/i);
+    if (repairMatch && request.method === 'POST') { const input=await readBody(request); return send(response,200,JSON.stringify(await updateRepairRequest(repairMatch[1],input.action))); }
     if (pathname === '/api/history/export' && request.method === 'GET') return send(response,200,JSON.stringify(await exportHistory(),null,2),'application/json; charset=utf-8');
     if (pathname === '/api/history/import' && request.method === 'POST') return send(response,200,JSON.stringify(await importHistory(await readBody(request))));
     if (pathname === '/api/history/retention' && request.method === 'POST') { const input=await readBody(request); return send(response,200,JSON.stringify(await retainHistory(input.keep ?? 500))); }
     const workerMatch = pathname.match(/^\/api\/workers\/([a-z0-9-]+)\/runs$/); if (workerMatch && request.method === 'GET') return send(response,200,JSON.stringify(await loadWorkerRunDetails(workerMatch[1])));
-    if (pathname === '/api/decisions' && request.method === 'POST') {
-      const input = await readBody(request); return send(response, 200, JSON.stringify(await recordDecision(input.id, input.decision)));
-    }
+    if (pathname === '/api/decisions' && request.method === 'POST') { const input = await readBody(request); return send(response, 200, JSON.stringify(await recordDecision(input.id, input.decision))); }
     if (request.method !== 'GET') return send(response, 405, JSON.stringify({ error: 'Method not allowed' }));
     const requested = pathname === '/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
     if (requested.includes('..')) return send(response, 400, JSON.stringify({ error: 'Invalid path' }));
