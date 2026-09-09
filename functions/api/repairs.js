@@ -1,19 +1,34 @@
 import { failure, json, jsonBody, requireDb } from '../_lib.js';
+import { managedProperties, managedPropertyIds } from '../_managed-properties.js';
 
-const targets = new Set(['management-hub','image-optimiser','pod-suite','ad-manager','book-creator','content-creator','smart-cleaner-web']);
 const kinds = new Set(['repair','edit']);
 const clean = (value) => typeof value === 'string' ? value.trim() : '';
 function validate(input = {}) {
   const target=clean(input.target), kind=clean(input.kind), summary=clean(input.summary), details=clean(input.details);
-  if(!targets.has(target)) throw Object.assign(new Error('Invalid repair target'),{status:400});
+  if(!managedPropertyIds.has(target)) throw Object.assign(new Error('Invalid repair target'),{status:400});
   if(!kinds.has(kind)) throw Object.assign(new Error('Invalid repair type'),{status:400});
   if(summary.length<8||summary.length>120) throw Object.assign(new Error('Repair summary must be between 8 and 120 characters'),{status:400});
   if(details.length<12||details.length>2000) throw Object.assign(new Error('Repair details must be between 12 and 2000 characters'),{status:400});
   return {target,kind,summary,details,status:'awaiting-branch-work',deploymentGate:'blocked-until-all-tests-pass'};
 }
+function parsePayload(row){try{return JSON.parse(row.payload_json||'{}');}catch{return{};}}
 
 export async function onRequestGet({ env }) {
-  try { const db=requireDb(env); const {results=[]}=await db.prepare("SELECT event_id, recorded_at, payload_json FROM history_events WHERE type='repair-requested' ORDER BY recorded_at DESC").all(); return json({schemaVersion:'1.0.0',requests:results.map((row)=>({eventId:row.event_id,recordedAt:row.recorded_at,...JSON.parse(row.payload_json)}))}); }
+  try {
+    const db=requireDb(env);
+    const {results=[]}=await db.prepare("SELECT event_id, type, recorded_at, payload_json FROM history_events WHERE type IN ('repair-requested','repair-status-changed') ORDER BY recorded_at DESC").all();
+    const statusByRepair=new Map();
+    for(const row of results){
+      if(row.type!=='repair-status-changed') continue;
+      const payload=parsePayload(row), repairEventId=payload.repairEventId;
+      if(repairEventId&&!statusByRepair.has(repairEventId)) statusByRepair.set(repairEventId,{status:payload.status,lastAction:payload.action,lastChangedAt:row.recorded_at});
+    }
+    const requests=results.filter((row)=>row.type==='repair-requested').map((row)=>{
+      const repair=parsePayload(row), change=statusByRepair.get(row.event_id);
+      return {eventId:row.event_id,recordedAt:row.recorded_at,...repair,status:change?.status||repair.status,lastAction:change?.lastAction||null,lastChangedAt:change?.lastChangedAt||row.recorded_at};
+    });
+    return json({schemaVersion:'1.1.0',managedProperties,requests});
+  }
   catch(error){return failure(error);}
 }
 
