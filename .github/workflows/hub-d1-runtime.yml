@@ -1,0 +1,83 @@
+name: Hub D1 Runtime Verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "Verify only, or apply pending additive migrations then verify"
+        required: true
+        default: verify
+        type: choice
+        options:
+          - verify
+          - apply
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ascension-hub-d1-runtime
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify remote D1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.MANAGEMENT_HUB }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing MANAGEMENT_HUB repository secret"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID repository secret"; exit 1; }
+      - name: List remote migration state
+        run: npx wrangler d1 migrations list HUB_DB --remote
+      - name: Inspect remote tables
+        run: npx wrangler d1 execute HUB_DB --remote --command "SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name;"
+
+  apply:
+    name: Apply pending D1 migrations
+    if: ${{ inputs.stage == 'apply' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.MANAGEMENT_HUB }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "Missing MANAGEMENT_HUB repository secret"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "Missing CLOUDFLARE_ACCOUNT_ID repository secret"; exit 1; }
+      - name: Apply repository migrations to remote D1
+        run: npx wrangler d1 migrations apply HUB_DB --remote
+      - name: Verify migration state after apply
+        run: npx wrangler d1 migrations list HUB_DB --remote
+      - name: Verify required Hub tables
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(npx wrangler d1 execute HUB_DB --remote --command "SELECT name FROM sqlite_schema WHERE type='table' ORDER BY name;")"
+          printf '%s\n' "$output"
+          for table in decisions history_events history_archive automation_schedules automation_actions release_evidence; do
+            grep -q "$table" <<<"$output" || { echo "Missing required table: $table"; exit 1; }
+          done

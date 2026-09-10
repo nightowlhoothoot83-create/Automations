@@ -1,0 +1,33 @@
+name: Ascension Hub Scheduler
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ascension-hub-scheduler
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run due safe automations
+        env:
+          HUB_SCHEDULER_KEY: ${{ secrets.HUB_SCHEDULER_KEY }}
+          HUB_SCHEDULER_URL: ${{ vars.HUB_SCHEDULER_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$HUB_SCHEDULER_KEY" || { echo "Missing HUB_SCHEDULER_KEY secret"; exit 1; }
+          endpoint="${HUB_SCHEDULER_URL:-https://ascension-automation-hub.pages.dev/api/scheduler}"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $HUB_SCHEDULER_KEY" \
+            -H "Content-Type: application/json" \
+            "$endpoint"

@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "releaseFlow": ["check", "test", "preview", "review", "deploy"],
+  "groups": [
+    {"id":"site-adsense","label":"Site & AdSense Health","mode":"monitor-first","productionGate":true,"defaultSchedule":"every-6-hours"},
+    {"id":"saas","label":"SaaS Health & Repair","mode":"monitor-repair","productionGate":true,"defaultSchedule":"every-6-hours"},
+    {"id":"store-listings","label":"Store & Listings","mode":"draft-first","productionGate":true,"defaultSchedule":"manual"},
+    {"id":"marketing-assets","label":"Marketing & Assets","mode":"prepare-first","productionGate":true,"defaultSchedule":"manual"},
+    {"id":"automation-health","label":"System & Automation Health","mode":"read-only-default","productionGate":false,"defaultSchedule":"weekly"}
+  ],
+  "review": {
+    "order": ["screenshots", "test-results", "preview-url", "change-summary", "logs", "approval-history"],
+    "visualEvidence": ["desktop", "mobile", "before-after-when-relevant"],
+    "plainEnglishSummaryFirst": true,
+    "technicalDetailsCollapsedByDefault": true
+  },
+  "scheduling": {
+    "ownerControls": ["run-now", "last-run", "next-run", "frequency", "pause", "resume"],
+    "friendlyFrequencies": ["every-6-hours", "daily", "weekly", "manual"],
+    "showCronToOwner": false,
+    "heavyActionsManual": true,
+    "mustShowConfirmedSchedule": true
+  },
+  "policy": {
+    "autoMonitor": true,
+    "autoRepairProduction": false,
+    "autoMerge": false,
+    "autoDeploy": false,
+    "autoPublish": false,
+    "requireTestBeforePreview": true,
+    "requirePreviewBeforeDeploy": true,
+    "requirePassingChecksBeforePreview": true,
+    "requireReviewBeforeDeploy": true,
+    "requireOwnerApprovalForProduction": true
+  }
+}

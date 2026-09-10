@@ -1,0 +1,43 @@
+name: Hub Branch Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - 'raven/**'
+      - 'codex/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hub-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test
+        run: npm run check
+      - name: Build Pages bundle
+        run: npm run build:pages
+      - name: Syntax check control-plane files
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/hub/public/owner-controls.js
+          node --check functions/_automation-control.js
+          node --check functions/_owner-auth.js
+          node --check functions/api/automations.js
+          node --check functions/api/automation-action.js
+          node --check functions/api/scheduler.js
