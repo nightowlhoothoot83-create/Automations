@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spew Crew Kids — Video Creator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E53E3E;--green:#38A169;--yellow:#D69E2E;--purple:#6B46C1;
+  --slime:#4ADE80;--bg:#0a0f1e;--card:#111827;--border:#1f2d4e;
+  --text:#f0e6ff;--muted:#6b7db3;--orange:#F97316;
+}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 10% 10%,rgba(229,62,62,0.08),transparent 50%),radial-gradient(ellipse at 90% 90%,rgba(74,222,128,0.06),transparent 50%);pointer-events:none}
+
+/* NAV */
+.nav{background:#0d1425;border-bottom:2px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Fredoka One';font-size:20px;color:#fff}
+.nav-logo span{color:var(--slime)}
+.nav-tabs{display:flex;gap:4px;margin-left:auto;overflow-x:auto}
+.nav-tab{background:transparent;border:none;padding:7px 12px;border-radius:10px;cursor:pointer;font-family:'Nunito';font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;transition:all .2s}
+.nav-tab.active{background:rgba(107,70,193,0.2);color:#fff}
+.nav-tab:hover{color:#fff}
+
+/* SCREENS */
+.screen{display:none;padding:16px;max-width:520px;margin:0 auto}
+.screen.active{display:block}
+
+/* DASHBOARD */
+.dash-hero{background:linear-gradient(135deg,#1a0535,#0a1a35);border:2px solid var(--border);border-radius:20px;padding:20px;margin-bottom:16px;text-align:center}
+.dash-hero h2{font-family:'Fredoka One';font-size:24px;margin-bottom:4px}
+.dash-hero p{color:var(--muted);font-size:13px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.stat-num{font-family:'Fredoka One';font-size:26px;margin-bottom:2px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.queue-section{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px}
+.section-title{font-family:'Fredoka One';font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.queue-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.queue-item:last-child{border-bottom:none}
+.queue-item:hover .queue-title{color:var(--slime)}
+.qi-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.qi-dot.pending{background:var(--orange)}
+.qi-dot.ready{background:var(--slime)}
+.qi-dot.done{background:var(--muted)}
+.queue-info{flex:1;min-width:0}
+.queue-title{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.queue-meta{font-size:11px;color:var(--muted)}
+.queue-action{background:var(--purple);border:none;border-radius:8px;padding:5px 10px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Nunito'}
+.queue-action:hover{background:#7c3aed}
+.btn-primary{background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:16px;padding:14px;color:#fff;cursor:pointer;font-family:'Fredoka One';font-size:18px;width:100%;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(249,115,22,0.4)}
+.btn-secondary{background:transparent;border:2px solid var(--border);border-radius:16px;padding:12px;color:var(--muted);cursor:pointer;font-family:'Fredoka One';font-size:15px;width:100%;transition:all .2s;margin-bottom:10px}
+.btn-secondary:hover{border-color:var(--slime);color:var(--slime)}
+
+/* WIZARD */
+.wiz-title{font-family:'Fredoka One';font-size:24px;text-align:center;margin:16px 0 4px}
+.wiz-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.steps-bar{display:flex;align-items:center;justify-content:center;gap:0;padding:16px 0 0;max-width:400px;margin:0 auto}
+.step-dot{width:32px;height:32px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:var(--muted);transition:all .3s;flex-shrink:0}
+.step-dot.active{background:var(--purple);border-color:var(--purple);color:#fff}
+.step-dot.done{background:var(--slime);border-color:var(--slime);color:#000}
+.step-line{height:2px;flex:1;background:var(--border);transition:background .3s}
+.step-line.done{background:var(--slime)}
+
+/* FORMAT CARDS */
+.format-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.format-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;text-align:center;transition:all .2s}
+.format-card:hover{border-color:rgba(107,70,193,.5)}
+.format-card.selected{border-color:var(--purple);background:rgba(107,70,193,.15)}
+.format-icon{font-size:28px;margin-bottom:6px}
+.format-name{font-family:'Fredoka One';font-size:14px}
+.format-desc{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* THEME GRID */
+.theme-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.cat-btn{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;font-size:12px;font-weight:800;color:var(--muted);transition:all .2s;font-family:'Nunito'}
+.cat-btn:hover,.cat-btn.selected{border-color:var(--purple);color:#fff;background:rgba(107,70,193,.2)}
+.theme-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.theme-chip{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s;font-family:'Nunito'}
+.theme-chip:hover,.theme-chip.selected{border-color:var(--slime);color:var(--slime);background:rgba(74,222,128,.08)}
+
+/* CHAR CARDS */
+.char-row{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.char-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;position:relative}
+.char-card.selected{border-color:var(--purple)}
+.char-card.selected::after{content:'✓';position:absolute;top:10px;right:10px;background:var(--purple);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.char-hdr{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.char-emoji{font-size:24px}
+.char-name{font-family:'Fredoka One';font-size:15px}
+.char-desc{font-size:12px;color:var(--muted)}
+
+/* SCHEDULE */
+.sched-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.sched-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.sched-day{font-weight:800;font-size:13px;width:80px;flex-shrink:0}
+.sched-count{background:rgba(107,70,193,.2);border:1px solid rgba(107,70,193,.4);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;color:#c9b8ff}
+.sched-plat{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.plat-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.plat-yt{background:rgba(229,62,62,.2);color:#fc8181;border:1px solid rgba(229,62,62,.3)}
+.plat-ig{background:rgba(249,115,22,.2);color:#fdba74;border:1px solid rgba(249,115,22,.3)}
+.plat-tt{background:rgba(74,222,128,.2);color:#86efac;border:1px solid rgba(74,222,128,.3)}
+.plat-fb{background:rgba(99,102,241,.2);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
+
+/* GENERATING */
+.gen-wrap{padding:30px 16px;text-align:center;max-width:480px;margin:0 auto}
+.gen-big-icon{font-size:56px;margin-bottom:12px;animation:bounce .8s ease-in-out infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+.gen-title{font-family:'Fredoka One';font-size:26px;margin-bottom:6px}
+.gen-subtitle{color:var(--muted);font-size:14px;margin-bottom:24px}
+.gen-steps{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:16px;text-align:left;margin-bottom:20px}
+.gs{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.gs:last-child{border-bottom:none}
+.gs-dot{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--muted);flex-shrink:0;transition:all .3s}
+.gs-dot.active{background:var(--purple);color:#fff;animation:pulse 1s infinite}
+.gs-dot.done{background:var(--slime);color:#000}
+.gs-text{font-size:13px;color:var(--muted)}
+.gs-text.active{color:#fff;font-weight:700}
+.gs-text.done{color:var(--slime)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(107,70,193,.4)}50%{box-shadow:0 0 0 8px rgba(107,70,193,0)}}
+
+/* VIDEO PACKAGE */
+.vp-wrap{padding:16px;max-width:520px;margin:0 auto}
+.vp-topbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.btn-back{background:transparent;border:2px solid var(--border);border-radius:14px;padding:7px 14px;color:var(--muted);cursor:pointer;font-family:'Nunito';font-weight:700;font-size:12px;transition:all .2s}
+.btn-back:hover{border-color:var(--slime);color:var(--slime)}
+.vp-title{font-family:'Fredoka One';font-size:18px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* FRAMES */
+.frames-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;scroll-snap-type:x mandatory}
+.frame-card{flex-shrink:0;width:200px;scroll-snap-align:start;background:var(--card);border:2px solid var(--border);border-radius:14px;overflow:hidden}
+.frame-img{width:200px;height:200px;object-fit:cover;display:block;background:linear-gradient(135deg,#1a0535,#0a1a35)}
+.frame-ph{width:200px;height:200px;background:linear-gradient(135deg,#1a0535,#0a1a35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:12px}
+.frame-info{padding:8px}
+.frame-num{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.frame-text{font-size:12px;margin-top:2px;line-height:1.4;color:#ccc}
+
+/* SCRIPT */
+.script-box{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px}
+.script-title{font-size:11px;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.script-content{font-size:13px;line-height:1.7;color:var(--muted);white-space:pre-wrap}
+
+/* META AI PROMPT */
+.meta-box{background:rgba(24,119,242,.06);border:2px solid rgba(24,119,242,.25);border-radius:14px;padding:14px;margin-bottom:14px}
+.meta-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.meta-icon{background:linear-gradient(135deg,#1877f2,#5f27cd);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.meta-title{font-family:'Fredoka One';font-size:16px;color:#93c5fd}
+.meta-steps{font-size:12px;color:var(--muted);line-height:1.9;margin-bottom:10px}
+.meta-prompt-box{background:rgba(24,119,242,.08);border:1px solid rgba(24,119,242,.2);border-radius:10px;padding:10px;font-size:12px;color:#93c5fd;font-family:monospace;white-space:pre-wrap;max-height:160px;overflow-y:auto;line-height:1.5}
+.btn-copy{background:rgba(24,119,242,.15);border:1px solid rgba(24,119,242,.3);border-radius:8px;padding:6px 12px;color:#93c5fd;cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito';margin-top:8px;width:100%;transition:all .2s}
+.btn-copy:hover{background:rgba(24,119,242,.25)}
+
+/* EXPORT */
+.export-row{display:flex;gap:8px;margin-bottom:14px}
+.btn-dl{flex:1;background:linear-gradient(135deg,var(--purple),#9333ea);border:none;border-radius:12px;padding:12px;color:#fff;cursor:pointer;font-family:'Fredoka One';font-size:14px;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+.btn-dl:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(107,70,193,.4)}
+.btn-dl:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* SCHEDULE SCREEN */
+.sched-screen{padding:16px;max-width:520px;margin:0 auto}
+.week-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.week-nav{background:transparent;border:2px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--muted);cursor:pointer;font-size:16px;font-family:'Nunito'}
+.week-nav:hover{border-color:var(--slime);color:var(--slime)}
+.week-label{font-family:'Fredoka One';font-size:18px}
+.day-card{background:var(--card);border:2px solid var(--border);border-radius:14px;margin-bottom:10px}
+.day-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
+.day-name{font-family:'Fredoka One';font-size:15px}
+.day-date{font-size:12px;color:var(--muted)}
+.day-add{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:8px;padding:4px 10px;color:var(--slime);cursor:pointer;font-size:12px;font-weight:700;font-family:'Nunito';transition:all .2s}
+.day-add:hover{background:rgba(74,222,128,.2)}
+.day-items{padding:8px 14px}
+.sched-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(31,45,78,.5)}
+.sched-item:last-child{border-bottom:none}
+.si-color{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.si-info{flex:1;min-width:0}
+.si-title{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.si-meta{font-size:10px;color:var(--muted)}
+.si-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.si-status.pending{background:rgba(249,115,22,.2);color:#fdba74}
+.si-status.ready{background:rgba(74,222,128,.2);color:#86efac}
+.si-generate{background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 7px;color:var(--muted);cursor:pointer;font-size:10px;font-weight:700;font-family:'Nunito';transition:all .2s;flex-shrink:0}
+.si-generate:hover{border-color:var(--purple);color:#fff}
+
+/* LIBRARY */
+.lib-screen{padding:16px;max-width:520px;margin:0 auto}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lib-card{background:var(--card);border:2px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .2s}
+.lib-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.lib-thumb{aspect-ratio:1;background:linear-gradient(135deg,#1a0535,#0a1a35);display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;overflow:hidden}
+.lib-thumb img{width:100%;height:100%;object-fit:cover}
+.lib-plat{position:absolute;top:6px;left:6px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.7);color:#fff}
+.lib-info{padding:8px}
+.lib-name{font-family:'Fredoka One';font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-meta{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* SETTINGS */
+.set-screen{padding:16px;max-width:520px;margin:0 auto}
+.set-section{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.set-label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.set-input{width:100%;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:10px;color:#fff;font-family:'Nunito';font-size:13px;outline:none;transition:border .2s}
+.set-input:focus{border-color:var(--purple)}
+.set-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.set-toggle-row:last-child{border-bottom:none}
+.set-toggle-label{font-size:13px;color:#ccc}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s}
+.toggle.on{background:var(--purple)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff;transition:left .2s}
+.toggle.on::after{left:23px}
+.btn-save{background:linear-gradient(135deg,var(--purple),#9333ea);border:none;border-radius:12px;padding:12px;color:#fff;cursor:pointer;font-family:'Fredoka One';font-size:16px;width:100%;margin-top:8px;transition:all .2s}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(107,70,193,.4)}
+
+/* COMMON */
+.btn-row{display:flex;gap:10px;margin-top:16px}
+.btn-back-wiz{background:transparent;border:2px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--muted);cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;flex:1;transition:all .2s}
+.btn-back-wiz:hover{border-color:var(--muted);color:#fff}
+.btn-next-wiz{background:linear-gradient(135deg,var(--purple),#9333ea);border:none;border-radius:20px;padding:10px 16px;color:#fff;cursor:pointer;font-family:'Nunito';font-weight:800;font-size:14px;flex:2;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .2s}
+.btn-next-wiz:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(107,70,193,.4)}
+.btn-next-wiz:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.error-msg{background:rgba(229,62,62,.1);border:1px solid rgba(229,62,62,.3);border-radius:8px;padding:10px;font-size:12px;color:#fc8181;margin-top:10px;display:none}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a0535;border:2px solid var(--slime);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;color:var(--slime);z-index:1000;transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body><div style="padding:12px;text-align:center;background:#242044;color:white">Storyboard production: saved scenes and queue. Finished animation, audio and YouTube publishing are not connected. Queue runs while this page stays open.</div>
+
+<div class="nav">
+  <div class="nav-logo">Spew<span>Crew</span> 🎬</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('dash')">📊 Dashboard</button>
+    <button class="nav-tab" onclick="showTab('create')">🎬 Create</button>
+    <button class="nav-tab" onclick="showTab('schedule')">📅 Schedule</button>
+    <button class="nav-tab" onclick="showTab('library')">📁 Library</button>
+    <button class="nav-tab" onclick="showTab('settings')">⚙️ Settings</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ─────────────────────────────────────────────────────────── -->
+<div id="tab-dash" class="screen active">
+  <div class="dash-hero">
+    <h2>🎬 Spew Crew Video Creator</h2>
+    <p>Automated YouTube Shorts · Instagram Reels · TikTok · Facebook</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total" style="color:var(--slime)">0</div><div class="stat-label">Videos Made</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-queue" style="color:var(--orange)">0</div><div class="stat-label">In Queue</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-today" style="color:var(--red)">0</div><div class="stat-label">Due Today</div></div>
+  </div>
+  <div class="queue-section">
+    <div class="section-title">⚡ Ready to Post Today</div>
+    <div id="dash-queue"></div>
+  </div>
+  <button class="btn-primary" onclick="showTab('create')">🎬 Create New Video</button>
+  <button class="btn-secondary" onclick="autoGenerateAll()">🤖 Auto-Generate All Queued</button>
+</div>
+
+<!-- ── CREATE WIZARD ──────────────────────────────────────────────────────── -->
+<div id="tab-create" class="screen">
+  <div class="steps-bar">
+    <div class="step-dot active" id="vsd1">1</div><div class="step-line" id="vsl1"></div>
+    <div class="step-dot" id="vsd2">2</div><div class="step-line" id="vsl2"></div>
+    <div class="step-dot" id="vsd3">3</div><div class="step-line" id="vsl3"></div>
+    <div class="step-dot" id="vsd4">4</div><div class="step-line" id="vsl4"></div>
+    <div class="step-dot" id="vsd5">5</div>
+  </div>
+
+  <!-- STEP 1: FORMAT -->
+  <div id="vstep1">
+    <div class="wiz-title">Pick your format 📱</div>
+    <div class="wiz-sub">Where will this video be posted?</div>
+    <div class="format-grid">
+      <div class="format-card" onclick="selectFormat('yt_short','YouTube Short',60,'9:16')" id="fmt-yt_short">
+        <div class="format-icon">▶️</div>
+        <div class="format-name">YouTube Short</div>
+        <div class="format-desc">60 sec · 9:16</div>
+      </div>
+      <div class="format-card" onclick="selectFormat('ig_reel','Instagram Reel',30,'9:16')" id="fmt-ig_reel">
+        <div class="format-icon">📸</div>
+        <div class="format-name">Instagram Reel</div>
+        <div class="format-desc">30 sec · 9:16</div>
+      </div>
+      <div class="format-card" onclick="selectFormat('tiktok','TikTok',60,'9:16')" id="fmt-tiktok">
+        <div class="format-icon">🎵</div>
+        <div class="format-name">TikTok</div>
+        <div class="format-desc">60 sec · 9:16</div>
+      </div>
+      <div class="format-card" onclick="selectFormat('fb_reel','Facebook Reel',60,'9:16')" id="fmt-fb_reel">
+        <div class="format-icon">👥</div>
+        <div class="format-name">Facebook Reel</div>
+        <div class="format-desc">60 sec · 9:16</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn-next-wiz" onclick="vGoStep(2)" id="vbtn1" disabled>Next →</button></div>
+  </div>
+
+  <!-- STEP 2: THEME -->
+  <div id="vstep2" style="display:none">
+    <div class="wiz-title">Pick your theme 💥</div>
+    <div class="wiz-sub">What's the Spew Crew getting into?</div>
+    <div class="theme-cats">
+      <button class="cat-btn" onclick="vSelectCat('emotional')" id="vcat-emotional">💜 Emotional</button>
+      <button class="cat-btn" onclick="vSelectCat('behaviour')" id="vcat-behaviour">⭐ Behaviour</button>
+      <button class="cat-btn" onclick="vSelectCat('chaos')" id="vcat-chaos">🌈 Chaos</button>
+      <button class="cat-btn" onclick="vSelectCat('learning')" id="vcat-learning">📚 Learning</button>
+      <button class="cat-btn" onclick="vSelectCat('song')" id="vcat-song">🎵 Song/Music</button>
+      <button class="cat-btn" onclick="vSelectCat('adventure')" id="vcat-adventure">🚀 Adventure</button>
+    </div>
+    <div id="v-theme-chips" class="theme-chips"></div>
+    <div class="btn-row">
+      <button class="btn-back-wiz" onclick="vGoStep(1)">← Back</button>
+      <button class="btn-next-wiz" onclick="vGoStep(3)" id="vbtn2" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: CHARACTERS -->
+  <div id="vstep3" style="display:none">
+    <div class="wiz-title">Choose Your Crew 🦸</div>
+    <div class="wiz-sub">Pick 1 to 3 characters for this video</div>
+    <div class="char-row">
+      <div class="char-card" onclick="vToggleChar('rizzy')" id="vcc-rizzy">
+        <div class="char-hdr"><span class="char-emoji">🌈</span><div><div class="char-name" style="color:#E53E3E">Rizzy Reflux — The Leader</div><div class="char-desc">Bold · Dramatic · Protective · Emotional</div></div></div>
+      </div>
+      <div class="char-card" onclick="vToggleChar('spewy')" id="vcc-spewy">
+        <div class="char-hdr"><span class="char-emoji">🛹</span><div><div class="char-name" style="color:#4ADE80">Spewy Spence — The Chaos Engine</div><div class="char-desc">Cheeky · Adventurous · Hyperactive · Funny</div></div></div>
+      </div>
+      <div class="char-card" onclick="vToggleChar('milky')" id="vcc-milky">
+        <div class="char-hdr"><span class="char-emoji">🍼</span><div><div class="char-name" style="color:#F6E05E">Milky Matt — The Heart</div><div class="char-desc">Sweet · Goofy · Loveable · Clumsy</div></div></div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:12px" id="vchar-count">0 selected</div>
+    <div class="btn-row">
+      <button class="btn-back-wiz" onclick="vGoStep(2)">← Back</button>
+      <button class="btn-next-wiz" onclick="vGoStep(4)" id="vbtn3" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: SCHEDULE -->
+  <div id="vstep4" style="display:none">
+    <div class="wiz-title">Schedule it 📅</div>
+    <div class="wiz-sub">When should this go live?</div>
+    <div style="margin-bottom:16px">
+      <div class="set-label">Post date</div>
+      <input class="set-input" type="date" id="vpost-date">
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="set-label">Post time</div>
+      <input class="set-input" type="time" id="vpost-time" value="09:00">
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="set-label">Platforms to post on</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer"><input type="checkbox" id="vp-yt" checked style="accent-color:var(--red)"> YouTube</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer"><input type="checkbox" id="vp-ig" checked style="accent-color:var(--orange)"> Instagram</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer"><input type="checkbox" id="vp-tt" checked style="accent-color:var(--slime)"> TikTok</label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer"><input type="checkbox" id="vp-fb" style="accent-color:#6366f1"> Facebook</label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-back-wiz" onclick="vGoStep(3)">← Back</button>
+      <button class="btn-next-wiz" onclick="vGoStep(5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: GENERATE -->
+  <div id="vstep5" style="display:none">
+    <div class="wiz-title">Generate! 🚀</div>
+    <div class="wiz-sub">Review and create your video package</div>
+    <div style="background:var(--card);border:2px solid var(--purple);border-radius:14px;padding:16px;margin-bottom:16px">
+      <div id="vreview-content"></div>
+    </div>
+    <div id="vapi-row" style="margin-bottom:12px">
+      <div class="set-label">Server-side generation connection</div>
+      <input class="set-input" type="url" id="vapi-key" placeholder="https://your-worker.workers.dev">
+    </div>
+    <button class="btn-primary" onclick="generateVideo()" id="vbtn-gen">🎬 Generate Storyboard Package</button><button class="btn-primary" onclick="enqueueVideo()">Add to generation queue</button>
+    <div class="btn-row">
+      <button class="btn-back-wiz" onclick="vGoStep(4)">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GENERATING SCREEN ──────────────────────────────────────────────────── -->
+<div id="tab-generating" class="screen">
+  <div class="gen-wrap">
+    <div class="gen-big-icon">🎬</div><button class="btn-back-wiz" onclick="stopQueue()">Stop after current request</button>
+    <div class="gen-title">Creating your storyboard package...</div>
+    <div class="gen-subtitle" id="vgen-sub">Generating script and storyboard...</div>
+    <div class="gen-steps">
+      <div class="gs"><div class="gs-dot active" id="vgd1">1</div><div class="gs-text active" id="vgt1">Writing script & storyboard</div></div>
+      <div class="gs"><div class="gs-dot" id="vgd2">2</div><div class="gs-text" id="vgt2">Generating frame illustrations</div></div>
+      <div class="gs"><div class="gs-dot" id="vgd3">3</div><div class="gs-text" id="vgt3">Building Meta AI prompt package</div></div>
+      <div class="gs"><div class="gs-dot" id="vgd4">4</div><div class="gs-text" id="vgt4">Preparing captions & hashtags</div></div>
+      <div class="gs"><div class="gs-dot" id="vgd5">5</div><div class="gs-text" id="vgt5">Saving to library</div></div>
+    </div>
+    <div class="error-msg" id="vgen-error"></div>
+  </div>
+</div>
+
+<!-- ── VIDEO PACKAGE SCREEN ─────────────────────────────────────────────── -->
+<div id="tab-package" class="screen">
+  <div class="vp-wrap">
+    <div class="vp-topbar">
+      <button class="btn-back" onclick="showTab('library')">← Library</button>
+      <div class="vp-title" id="vpkg-title">Video Title</div>
+    </div>
+
+    <!-- STORYBOARD FRAMES -->
+    <div class="section-title" style="margin-bottom:10px">🎞️ Storyboard Frames</div>
+    <div class="frames-scroll" id="vpkg-frames"></div>
+
+    <!-- VOICE SCRIPT -->
+    <div class="script-box">
+      <div class="script-title">🎙️ Voice-Over Script</div>
+      <div class="script-content" id="vpkg-script">—</div>
+    </div>
+
+    <!-- META AI PROMPT PACKAGE -->
+    <div class="meta-box">
+      <div class="meta-header">
+        <div class="meta-icon">🤖</div>
+        <div class="meta-title">Meta AI Video Prompt</div>
+      </div>
+      <div class="meta-steps">
+        1. Open Meta AI Chrome Extension<br>
+        2. Click the image icon and upload each frame below (in order)<br>
+        3. Paste this exact prompt:
+      </div>
+      <div class="meta-prompt-box" id="vpkg-meta-prompt">—</div>
+      <button class="btn-copy" onclick="copyMetaPrompt()">📋 Copy Prompt</button>
+    </div>
+
+    <!-- CAPTIONS -->
+    <div class="script-box">
+      <div class="script-title">📱 Social Media Captions</div>
+      <div class="script-content" id="vpkg-captions">—</div>
+    </div>
+
+    <!-- MUSIC -->
+    <div class="script-box" style="background:rgba(74,222,128,.04);border-color:rgba(74,222,128,.25)">
+      <div class="script-title" style="color:var(--slime)">🎵 Music Direction</div>
+      <div class="script-content" id="vpkg-music">—</div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+        Free music tools: <a href="https://www.beatoven.ai" target="_blank" style="color:var(--slime)">Beatoven.ai</a> · 
+        <a href="https://musicfx.withgoogle.com" target="_blank" style="color:var(--slime)">MusicFX</a> · 
+        <a href="https://www.sonauto.ai" target="_blank" style="color:var(--slime)">Sonauto</a>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="export-row">
+      <button class="btn-dl" onclick="downloadPackage()" id="vbtn-dl">📦 Download Package</button>
+      <button class="btn-dl" onclick="showTab('create')" style="background:linear-gradient(135deg,#374151,#1f2937)">+ New Video</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHEDULE ──────────────────────────────────────────────────────────── -->
+<div id="tab-schedule" class="screen">
+  <div class="sched-screen">
+    <div class="week-header">
+      <button class="week-nav" onclick="prevWeek()">◀</button>
+      <div class="week-label" id="week-label">This Week</div>
+      <button class="week-nav" onclick="nextWeek()">▶</button>
+    </div>
+    <div id="week-calendar"></div>
+    <button class="btn-primary" style="margin-top:12px" onclick="showTab('create')">+ Add Video to Schedule</button>
+  </div>
+</div>
+
+<!-- ── LIBRARY ────────────────────────────────────────────────────────────── -->
+<div id="tab-library" class="screen">
+  <div class="lib-screen">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-family:'Fredoka One';font-size:20px">📁 Video Library</div>
+      <button class="day-add" onclick="showTab('create')">+ New</button>
+    </div>
+    <div id="lib-grid-v" class="lib-grid"></div>
+  </div>
+</div>
+
+<!-- ── SETTINGS ──────────────────────────────────────────────────────────── -->
+<div id="tab-settings" class="screen">
+  <div class="set-screen">
+    <div class="set-section">
+      <div class="set-label">Generation connection (keys stay on the server)</div>
+      <input class="set-input" type="url" id="s-api-key" placeholder="https://your-worker.workers.dev">
+    </div>
+    <div class="set-section">
+      <div class="set-label">Publishing connections — not yet available</div>
+      <div class="set-toggle-row"><span class="set-toggle-label">Automatic publishing — not connected</span><div class="toggle" aria-disabled="true" title="Publishing is not connected"></div></div>
+      <div class="set-toggle-row"><span class="set-toggle-label">Post to YouTube</span><div class="toggle" aria-disabled="true" title="Publishing is not connected"></div></div>
+      <div class="set-toggle-row"><span class="set-toggle-label">Post to Instagram</span><div class="toggle" aria-disabled="true" title="Publishing is not connected"></div></div>
+      <div class="set-toggle-row"><span class="set-toggle-label">Post to TikTok</span><div class="toggle" aria-disabled="true" title="Publishing is not connected"></div></div>
+      <div class="set-toggle-row"><span class="set-toggle-label">Post to Facebook</span><div class="toggle" aria-disabled="true" title="Publishing is not connected"></div></div>
+    </div>
+    <div class="set-section">
+      <div class="set-label">Planning times (AEST; these do not publish)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="set-input" type="time" value="07:00" style="flex:1;min-width:80px">
+        <input class="set-input" type="time" value="12:00" style="flex:1;min-width:80px">
+        <input class="set-input" type="time" value="19:00" style="flex:1;min-width:80px">
+      </div>
+    </div>
+    <div class="set-section"><div class="set-label">Character reference images</div><p>Choose one approved image per character. References are kept on this device and sent with that character's scene requests.</p><label>Rizzy Reflux<input type="file" accept="image/png,image/jpeg" onchange="saveCharacterReference('rizzy',this.files[0])"><span id="ref-rizzy"></span></label><br><label>Spewy Spence<input type="file" accept="image/png,image/jpeg" onchange="saveCharacterReference('spewy',this.files[0])"><span id="ref-spewy"></span></label><br><label>Milky Matt<input type="file" accept="image/png,image/jpeg" onchange="saveCharacterReference('milky',this.files[0])"><span id="ref-milky"></span></label><br></div><button class="btn-save" onclick="saveSettings()">💾 Save Settings</button>
+  </div>
+</div>
+
+<div class="toast" id="toast-v"></div>
+
+<script>
+// ── API KEY ───────────────────────────────────────────────────────────────
+const DEFAULT_WORKER = 'https://spewcrewbookcreator.ascensiondigitalagency.workers.dev';
+const pipelineReady = import('./pipeline.mjs');
+const storeReady = pipelineReady.then(p => p.openStore());
+let runController = null;
+let queue = null;
+let characterReferences = {};
+function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ── CHARACTER DNA — CANON LOCKED ─────────────────────────────────────────
+const CHAR = {
+  rizzy:{
+    name:'Rizzy Reflux', emoji:'🌈', color:'#E53E3E',
+    visual:'round small chubby cartoon monster girl entirely covered in bright scarlet-red spiky fluffy fur, large round expressive dark eyes with lashes, round pink-red button nose, VERY LARGE rainbow bow hairpiece on top of her head with bold horizontal stripes (purple, blue, green, yellow, orange, red from top to bottom), black Spew Crew Kids t-shirt, bright purple pleated mini skirt, purple and black horizontal striped leggings, red canvas high-top sneakers with white soles and rubber toe',
+    personality:'bold, confident, dramatic, protective, loud, emotionally expressive',
+    catchphrase:"Let's GO, crew!",
+    power:'explosive rainbow reflux blast from mouth when overwhelmed',
+  },
+  spewy:{
+    name:'Spewy Spence', emoji:'🛹', color:'#4ADE80',
+    visual:'small round chubby cartoon monster boy with smooth bright lime-green slime-textured body, large round dark expressive eyes, round red button nose, backwards black baseball cap with slight tilt, black Spew Crew Kids t-shirt, blue denim jeans with rolled cuffs, black canvas sneakers, wooden skateboard usually nearby or under feet',
+    personality:'cheeky, adventurous, hyperactive, mischievous, funny, loyal',
+    catchphrase:'Dude, watch THIS!',
+    power:'high-pressure jets of bright neon green cartoon spew when hyped',
+  },
+  milky:{
+    name:'Milky Matt', emoji:'🍼', color:'#F6E05E',
+    visual:'small round chubby cartoon baby monster with pale cream/butter-yellow drippy blobby body that looks like it is made of dripping milk or thick custard, wispy pale yellow hair on top of round head, large innocent wide round dark eyes, round red button nose, BIG bright red pacifier/dummy always in mouth, blue tracksuit jacket with white Adidas-style stripes on sleeves, matching blue tracksuit pants with white side stripes, blue-and-white classic sneakers',
+    personality:'sweet, gentle, goofy, loveable, clumsy, imaginative, easily startled',
+    catchphrase:"Oh wow, you're SO good at that!",
+    power:'massive milk geyser eruption when nervous or startled',
+  }
+};
+
+const VIDEO_THEMES = {
+  emotional:{label:'💜 Emotional',themes:['Big feelings','Calming down','Asking for help','Frustration explosion','Being scared','Feeling left out','Happy dance','Missing someone']},
+  behaviour:{label:'⭐ Behaviour',themes:['Sharing the skateboard','Taking turns','Cleaning up the mess','Trying again after failing','Being gentle','Using kind words','Teamwork challenge','Helping a friend']},
+  chaos:{label:'🌈 Chaos',themes:['Rainbow spew disaster','Slime everywhere','Skateboard accident','Milk fountain','Lost in the park','Broke something by mistake','Too much excitement','Ran too fast']},
+  learning:{label:'📚 Learning',themes:['Counting with chaos','Rainbow colours','Cause and effect mess','Problem solving together','Feelings vocabulary','Friends and kindness','Sharing and caring','Shapes in the skatepark']},
+  song:{label:'🎵 Song',themes:['The Spew Crew theme song','Rizzy\'s Feeling Song','Spewy\'s Skater Rap','Milky\'s Gentle Lullaby','Clean Up Chaos Song','Friendship Funk','Rainbow Rage Song','The Spew Crew Shuffle']},
+  adventure:{label:'🚀 Adventure',themes:['Trip to the playground','Lost in the supermarket','First day at school','The beach spew','Camping chaos','Pool party disaster','Animal encounter','Rainy day inside']},
+};
+
+// ── VIDEO STATE ───────────────────────────────────────────────────────────
+let vs = {format:null,theme:null,category:null,chars:[],date:null,time:'09:00',platforms:[]};
+let vLibrary = [];
+let curPkg = null;
+let weekOffset = 0;
+
+// ── NAV ──────────────────────────────────────────────────────────────────
+function showTab(t) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  const tabs = {dash:0,create:1,schedule:2,library:3,settings:4};
+  if(tabs[t]!==undefined) document.querySelectorAll('.nav-tab')[tabs[t]].classList.add('active');
+  if(t==='dash') renderDash();
+  if(t==='library') renderLibrary();
+  if(t==='schedule') renderSchedule();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────
+function renderDash() {
+  document.getElementById('stat-total').textContent = vLibrary.length;
+  const today = new Date().toDateString();
+  const due = vLibrary.filter(v=>v.status==='pending' && new Date(v.schedDate).toDateString()===today);
+  document.getElementById('stat-queue').textContent = vLibrary.filter(v=>v.status==='pending').length;
+  document.getElementById('stat-today').textContent = due.length;
+  const q = document.getElementById('dash-queue');
+  if(vLibrary.length === 0) {
+    q.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No videos yet — create your first!</div>';
+  } else {
+    q.innerHTML = vLibrary.slice(0,5).map(v=>`
+      <div class="queue-item" onclick="openPkg('${v.id}')">
+        <div class="qi-dot ${v.status}"></div>
+        <div class="queue-info">
+          <div class="queue-title">${escapeHtml(v.title)}</div>
+          <div class="queue-meta">${v.format} · ${v.chars.map(c=>CHAR[c]?.emoji||'').join('')} · ${v.schedDate||'Unscheduled'}</div>
+        </div>
+        <span>${escapeHtml(v.status)} ${v.completedScenes||0} scenes</span>${['failed','stopped','interrupted'].includes(v.status)?`<button class="queue-action" onclick="event.stopPropagation();retryJob('${v.id}')">Resume</button>`:`<button class="queue-action" onclick="event.stopPropagation();openPkg('${v.id}')">Open</button>`}
+      </div>`).join('');
+  }
+}
+
+// ── WIZARD STEPS ─────────────────────────────────────────────────────────
+function vGoStep(n) {
+  if(n===5) buildVReview();
+  for(let i=1;i<=5;i++){
+    document.getElementById('vstep'+i).style.display=i===n?'block':'none';
+    const d=document.getElementById('vsd'+i);
+    d.className='step-dot'+(i<n?' done':i===n?' active':'');
+    if(i<5) document.getElementById('vsl'+i).className='step-line'+(i<n?' done':'');
+  }
+  document.getElementById('tab-create').scrollTop=0;
+}
+
+function selectFormat(v,name,dur,ar) {
+  vs.format={id:v,name,dur,ar};
+  document.querySelectorAll('.format-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('fmt-'+v).classList.add('selected');
+  document.getElementById('vbtn1').disabled=false;
+}
+
+function vSelectCat(c) {
+  vs.category=c; vs.theme=null;
+  document.querySelectorAll('.cat-btn[id^=vcat]').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('vcat-'+c).classList.add('selected');
+  const chips=document.getElementById('v-theme-chips');
+  chips.innerHTML=(VIDEO_THEMES[c]?.themes||[]).map(t=>`<button class="theme-chip" onclick="vSelectTheme('${t.replace(/'/g,"\\'")}',this)">${t}</button>`).join('');
+  document.getElementById('vbtn2').disabled=true;
+}
+
+function vSelectTheme(t,el) {
+  vs.theme=t;
+  document.querySelectorAll('.theme-chip').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('vbtn2').disabled=false;
+}
+
+function vToggleChar(c) {
+  const el=document.getElementById('vcc-'+c);
+  if(vs.chars.includes(c)){vs.chars=vs.chars.filter(x=>x!==c);el.classList.remove('selected');}
+  else{vs.chars.push(c);el.classList.add('selected');}
+  document.getElementById('vchar-count').textContent=vs.chars.length+' selected';
+  document.getElementById('vbtn3').disabled=vs.chars.length===0;
+}
+
+function buildVReview() {
+  document.getElementById('vapi-key').value=getWorker();
+  const date=document.getElementById('vpost-date').value||new Date().toISOString().split('T')[0];
+  const time=document.getElementById('vpost-time').value||'09:00';
+  const plats=[];
+  if(document.getElementById('vp-yt').checked)plats.push('YouTube');
+  if(document.getElementById('vp-ig').checked)plats.push('Instagram');
+  if(document.getElementById('vp-tt').checked)plats.push('TikTok');
+  if(document.getElementById('vp-fb').checked)plats.push('Facebook');
+  vs.date=date; vs.time=time; vs.platforms=plats;
+  document.getElementById('vreview-content').innerHTML=`
+    <div style="font-family:'Fredoka One';font-size:18px;color:var(--purple);margin-bottom:12px">${vs.format?.name||'—'} · ${vs.format?.dur}s</div>
+    <div style="font-size:13px;margin-bottom:6px;color:var(--muted)">Theme: <strong style="color:#fff">${escapeHtml(vs.theme||'—')}</strong></div>
+    <div style="font-size:13px;margin-bottom:6px;color:var(--muted)">Characters: <strong style="color:#fff">${vs.chars.map(c=>CHAR[c]?.emoji+' '+CHAR[c]?.name).join(', ')||'—'}</strong></div>
+    <div style="font-size:13px;margin-bottom:6px;color:var(--muted)">Scheduled: <strong style="color:#fff">${date} @ ${time}</strong></div>
+    <div style="font-size:13px;color:var(--muted)">Platforms: <strong style="color:#fff">${plats.join(', ')||'—'}</strong></div>`;
+}
+
+// ── GENERATE VIDEO PACKAGE ───────────────────────────────────────────────
+function textPrompt(brief) {
+    const vs=brief;
+    const charNames=vs.chars.map(c=>CHAR[c].name).join(' and ');
+    const charDNA=vs.chars.map(c=>`
+${CHAR[c].name.toUpperCase()} VISUAL DNA (MUST BE EXACTLY THIS EVERY FRAME):
+${CHAR[c].visual}
+Personality: ${CHAR[c].personality}
+Catchphrase: "${CHAR[c].catchphrase}"
+Power: ${CHAR[c].power}`).join('\n\n');
+
+    const dur=vs.format?.dur||60;
+    const frames=Math.min(dur===30?5:8, 8);
+    const STYLE='Children\'s cartoon illustration, Nickelodeon animation style, THICK BLACK outlines, bright bold saturated colors, clean white or simple colorful background, highly expressive faces, no text in image';
+
+    // 1. Script + storyboard
+    const scriptPrompt=`You are the creative director for SPEW CREW KIDS YouTube channel.
+Create a complete ${dur}-second ${vs.format?.name} video package.
+Theme: "${vs.theme}" (${vs.category})
+Characters: ${charNames}
+${charDNA}
+
+Return ONLY valid JSON:
+{
+  "title": "catchy video title under 60 chars",
+  "hook": "POWERFUL first 3 seconds hook text (must grab attention instantly)",
+  "voiceoverScript": "full voice-over script with [SCENE X] markers, ${dur} seconds total, energetic Nickelodeon style",
+  "frames": [
+    {
+      "frameNumber": 1,
+      "timecode": "0:00-0:05",
+      "scene": "detailed description of what's happening",
+      "action": "what the character(s) are doing",
+      "setting": "where the scene takes place",
+      "emotion": "emotional tone",
+      "voiceover": "voice-over text for this frame",
+      "sfx": "sound effects: e.g. SPLAT! BOING! WHOOSH!",
+      "characters": ["list of character ids: rizzy/spewy/milky"]
+    }
+  ],
+  "musicDirection": {
+    "genre": "e.g. kids funk, cartoon punk, silly electronic",
+    "bpm": "e.g. 120",
+    "mood": "e.g. high energy chaos",
+    "beatovenPrompt": "exact prompt for Beatoven.ai"
+  },
+  "captions": {
+    "youtube": "YouTube title + description + tags",
+    "instagram": "Instagram caption with emojis + hashtags",
+    "tiktok": "TikTok caption with trending hashtags",
+    "facebook": "Facebook post text"
+  },
+  "metaAIPrompt": "Complete Meta AI prompt to generate the animated video from the frames - include animation style, transitions, effects, and character movement instructions. Be very specific."
+}`;
+
+    return scriptPrompt;
+}
+function imagePrompt(fr, brief) {
+    const vs=brief;
+    const STYLE="Children's cartoon illustration, thick black outlines, bold saturated colours, expressive faces, no text. Preserve the supplied character reference appearance.";
+      const pgChars=(fr.characters||vs.chars).filter(c=>CHAR[c]);
+      const charVisuals=pgChars.map(c=>`
+CANONICAL CHARACTER — ${CHAR[c].name.toUpperCase()} — DRAW EXACTLY LIKE THIS:
+${CHAR[c].visual}
+Current emotion/expression: ${fr.emotion||'energetic and expressive'}`).join('\n\n');
+
+      const imgPrompt=`${STYLE}
+
+SCENE: ${fr.scene}
+SETTING: ${fr.setting}
+ACTION: ${fr.action}
+MOOD: ${fr.emotion}
+
+${charVisuals}
+
+IMPORTANT: Keep exact character appearance. Thick cartoon outlines. Bright colors. NO text visible in image.`;
+
+    return imgPrompt;
+}
+async function persistJob(job) {
+  const store=await storeReady;
+  await store.put(job);
+  const at=vLibrary.findIndex(v=>v.id===job.id);
+  if(at<0)vLibrary.unshift(job);else vLibrary[at]=job;
+  renderDash();
+}
+async function enqueueVideo() {
+  try {
+    buildVReview();
+    const p=await pipelineReady;
+    const job=p.createJob(vs,CHAR);
+    await persistJob(job);
+    showToastV('Story added to generation queue');showTab('dash');
+    return job;
+  } catch(e){showToastV(e.message);return null;}
+}
+function getWorker() { return document.getElementById('vapi-key')?.value?.trim() || localStorage.getItem('sc_worker_url') || DEFAULT_WORKER; }
+async function generateVideo() {
+  if(runController){showToastV('Generation is already running');return;}
+  const job=await enqueueVideo();
+  if(job)await runJobs([job]);
+}
+async function runJobs(jobs) {
+  if(runController){showToastV('Generation is already running');return;}
+  runController=new AbortController();
+  showTab('generating');
+  document.getElementById('vgen-error').style.display='none';
+  try {
+    const p=await pipelineReady;
+    queue ||= new p.JobQueue();
+    const workerUrl=getWorker();
+    const result=await queue.run(jobs,{
+      textPrompt,imagePrompt,save:persistJob,references:characterReferences,signal:runController.signal,
+      generate:(body,signal)=>p.requestGeneration(workerUrl,body,{signal}),
+      onProgress:message=>{document.getElementById('vgen-sub').textContent=message;}
+    });
+    const last=result.at(-1);
+    if(last?.status==='package-ready'){curPkg=last;renderPackage(last);showTab('package');}
+    else {showTab('dash');showToastV(last?.error || 'Queue stopped');}
+  } catch(e){showTab('dash');showToastV(e.message);}
+  finally {runController=null;renderDash();}
+}
+function stopQueue(){runController?.abort();}
+async function retryJob(id){
+  if(runController)return showToastV('Wait for the current queue to finish.');
+  const job=vLibrary.find(v=>v.id===id);
+  if(!job || !['failed','stopped','interrupted'].includes(job.status))return;
+  job.status='pending';await persistJob(job);await runJobs([job]);
+}
+// ── RENDER PACKAGE ────────────────────────────────────────────────────────
+function renderPackage(vid) {
+  document.getElementById('vpkg-title').textContent=vid.title;
+  const s=vid.script;
+
+  // Frames
+  document.getElementById('vpkg-frames').innerHTML=s.frames.map((fr,i)=>`
+    <div class="frame-card">
+      ${fr.imageB64
+        ?`<img class="frame-img" src="data:image/png;base64,${fr.imageB64}" alt="frame ${i+1}">`
+        :`<div class="frame-ph">${(fr.characters||vid.chars).map(c=>CHAR[c]?.emoji||'').join('')}<span>Frame ${i+1}</span></div>`}
+      <div class="frame-info">
+        <div class="frame-num">Frame ${i+1} · ${escapeHtml(fr.timecode||'')}</div>
+        <div class="frame-text">${escapeHtml(fr.voiceover||fr.scene||'')}</div>
+        ${fr.sfx?`<div style="color:var(--slime);font-size:11px;font-weight:700;margin-top:3px">${escapeHtml(fr.sfx)}</div>`:''}
+      </div>
+    </div>`).join('');
+
+  // Script
+  document.getElementById('vpkg-script').textContent=s.voiceoverScript||'—';
+
+  // Meta AI prompt
+  const metaPrompt=s.metaAIPrompt||buildDefaultMetaPrompt(vid,s);
+  document.getElementById('vpkg-meta-prompt').textContent=metaPrompt;
+
+  // Captions
+  const caps=s.captions||{};
+  document.getElementById('vpkg-captions').textContent=
+    `▶️ YOUTUBE:\n${caps.youtube||'—'}\n\n📸 INSTAGRAM:\n${caps.instagram||'—'}\n\n🎵 TIKTOK:\n${caps.tiktok||'—'}\n\n👥 FACEBOOK:\n${caps.facebook||'—'}`;
+
+  // Music
+  const m=s.musicDirection||{};
+  document.getElementById('vpkg-music').textContent=
+    `Genre: ${m.genre||'Kids cartoon funk'}\nBPM: ${m.bpm||'120'}\nMood: ${m.mood||'High energy and chaotic'}\n\nBeatoven.ai prompt:\n"${m.beatovenPrompt||'Upbeat kids cartoon theme, bouncy funk, slime and chaos energy, 120bpm'}"`;
+}
+
+function buildDefaultMetaPrompt(vid,s) {
+  const charDesc=vid.chars.map(c=>`${CHAR[c].name}: ${CHAR[c].visual.substring(0,100)}`).join('\n');
+  return `Create a ${vid.script?.frames?.length||6}-frame animated video for a children's YouTube Short called "${escapeHtml(vid.title)}".
+
+ANIMATION STYLE: Nickelodeon cartoon style. Bright bold colors. Thick black outlines. Bouncy expressive movement. Quick cuts. High energy.
+
+CHARACTERS MUST REMAIN CONSISTENT THROUGHOUT:
+${charDesc}
+
+TRANSITIONS: Fast wipe cuts between frames. Add cartoon sound effect text overlays (SPLAT! WHOOSH! BOING!).
+
+MOVEMENT: Characters should bounce, wiggle, and react with huge exaggerated expressions. Spewy should always be skating. Rizzy should stomp dramatically. Milky should wobble and accidentally spill things.
+
+PACING: ${vid.format} format, ${vid.script?.frames?.length||6} frames, total ${vid.format?.includes('30')?30:60} seconds.
+
+HOOK: Start with "${s.hook||'Watch what happens when the Spew Crew gets into trouble!'}"
+
+Add upbeat cartoon music vibe. Keep it family-friendly, energetic, and chaotic-but-wholesome.`;
+}
+
+function copyMetaPrompt() {
+  const txt=document.getElementById('vpkg-meta-prompt').textContent;
+  navigator.clipboard.writeText(txt).then(()=>showToastV('📋 Prompt copied!'));
+}
+
+// ── DOWNLOAD PACKAGE ─────────────────────────────────────────────────────
+async function downloadPackage() {
+  if(!curPkg){showToastV('No package loaded');return;}
+  const btn=document.getElementById('vbtn-dl');
+  btn.disabled=true;btn.textContent='⏳ Zipping...';
+  try{
+    const zip=new JSZip();
+    const s=curPkg.script;
+    const safeName=curPkg.title.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_');
+    zip.file('script.txt',s.voiceoverScript||'');
+    zip.file('meta_ai_prompt.txt',document.getElementById('vpkg-meta-prompt').textContent);
+    zip.file('captions.txt',document.getElementById('vpkg-captions').textContent);
+    zip.file('music_direction.txt',document.getElementById('vpkg-music').textContent);
+    const frames_info=s.frames.map((fr,i)=>`Frame ${i+1} [${fr.timecode}]\nScene: ${fr.scene}\nAction: ${fr.action}\nVoiceover: ${fr.voiceover}\nSFX: ${fr.sfx||'none'}\n`).join('\n---\n');
+    zip.file('storyboard.txt',frames_info);
+    for(let i=0;i<s.frames.length;i++){
+      if(s.frames[i].imageB64){
+        const b=atob(s.frames[i].imageB64);
+        const arr=new Uint8Array(b.length);
+        for(let j=0;j<b.length;j++)arr[j]=b.charCodeAt(j);
+        zip.file(`frame_${String(i+1).padStart(2,'0')}.png`,arr);
+      }
+    }
+    const blob=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=safeName+'_SpewCrew_Package.zip';
+    a.click();
+    showToastV('📦 Package downloaded!');
+  }catch(e){showToastV('Zip error: '+e.message);}
+  btn.disabled=false;btn.textContent='📦 Download Package';
+}
+
+// ── SCHEDULE ─────────────────────────────────────────────────────────────
+function renderSchedule() {
+  const now=new Date();
+  const start=new Date(now);
+  start.setDate(now.getDate()-now.getDay()+weekOffset*7);
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const html=days.map((d,i)=>{
+    const date=new Date(start);
+    date.setDate(start.getDate()+i);
+    const ds=date.toISOString().split('T')[0];
+    const isToday=date.toDateString()===now.toDateString();
+    const items=vLibrary.filter(v=>v.schedDate===ds);
+    return `<div class="day-card">
+      <div class="day-header">
+        <div><div class="day-name" style="${isToday?'color:var(--slime)':''}">${d}${isToday?' — TODAY':''}</div><div class="day-date">${date.toLocaleDateString('en-AU')}</div></div>
+        <button class="day-add" onclick="showTab('create')">+ Add</button>
+      </div>
+      <div class="day-items">${items.length===0?'<div style="font-size:11px;color:var(--muted);padding:6px 0">No videos scheduled</div>':items.map(v=>`
+        <div class="sched-item">
+          <div class="si-color" style="background:${v.chars[0]?CHAR[v.chars[0]].color:'var(--muted)'}"></div>
+          <div class="si-info"><div class="si-title">${escapeHtml(v.title)}</div><div class="si-meta">${v.schedTime||'—'} · ${v.format}</div></div>
+          <span class="si-status ${v.status}">${v.status}</span>
+          <button class="si-generate" onclick="openPkg('${v.id}')">View</button>
+        </div>`).join('')}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('week-calendar').innerHTML=html;
+  const s=new Date(start);
+  const e=new Date(start);e.setDate(e.getDate()+6);
+  document.getElementById('week-label').textContent=s.toLocaleDateString('en-AU',{month:'short',day:'numeric'})+' – '+e.toLocaleDateString('en-AU',{month:'short',day:'numeric'});
+}
+
+function prevWeek(){weekOffset--;renderSchedule();}
+function nextWeek(){weekOffset++;renderSchedule();}
+
+// ── LIBRARY ────────────────────────────────────────────────────────────────
+function renderLibrary() {
+  const grid=document.getElementById('lib-grid-v');
+  if(vLibrary.length===0){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><div style="font-size:40px;margin-bottom:10px">🎬</div>No videos yet!<br>Create your first Spew Crew video.</div>';
+  }else{
+    grid.innerHTML=vLibrary.map(v=>`
+      <div class="lib-card" onclick="openPkg('${v.id}')">
+        <div class="lib-thumb">
+          ${v.coverB64?`<img src="data:image/png;base64,${v.coverB64}" alt="cover">`:`<span>${v.chars.map(c=>CHAR[c]?.emoji||'').join('')}</span>`}
+          <span class="lib-plat">${v.format||'—'}</span>
+        </div>
+        <div class="lib-info">
+          <div class="lib-name">${escapeHtml(v.title)}</div>
+          <div class="lib-meta">${escapeHtml(v.theme)} · ${v.created}</div>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function openPkg(id) {
+  const vid=vLibrary.find(v=>v.id===id);
+  if(!vid)return;
+  if(!vid.script)return showToastV(vid.error||'This story is waiting in the generation queue.');
+  curPkg=vid;
+  renderPackage(vid);
+  showTab('package');
+}
+
+// ── AUTO GENERATE ─────────────────────────────────────────────────────────
+async function autoGenerateAll() {
+  const pending=vLibrary.filter(v=>v.status==='pending');
+  if(!pending.length)return showToastV('No pending stories. Use Add to generation queue.');
+  if(!confirm(`Generate ${pending.length} storyboard packages? This uses your existing AI provider balance. Keep this page open; background scheduling is not connected.`))return;
+  await runJobs(pending);
+}
+
+// ── GEN STEP HELPERS ──────────────────────────────────────────────────────
+function vGenStep(n,active,done) {
+  const d=document.getElementById('vgd'+n);
+  const t=document.getElementById('vgt'+n);
+  if(done){d.className='gs-dot done';d.textContent='✓';t.className='gs-text done';}
+  else if(active){d.className='gs-dot active';d.textContent=n;t.className='gs-text active';}
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+function saveSettings() {
+  try {
+    const url=new URL(document.getElementById('s-api-key').value.trim());
+    if(url.protocol!=='https:')throw new Error('Use an HTTPS Worker address.');
+    localStorage.setItem('sc_worker_url',url.href.replace(/\/$/,''));
+    document.getElementById('vapi-key').value=url.href.replace(/\/$/,'');
+    showToastV('Generation connection saved');
+  }catch(e){showToastV(e.message);}
+}
+async function saveCharacterReference(id,file){
+  if(!file)return;
+  try{
+    if(!['image/png','image/jpeg'].includes(file.type)||file.size>5*1024*1024)throw new Error('Use a PNG or JPEG under 5 MB.');
+    const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(file);});
+    const reference={mimeType:file.type,data:dataUrl.split(',')[1]};
+    await (await storeReady).put({id:'reference:'+id,reference});
+    characterReferences[id]=reference;
+    document.getElementById('ref-'+id).textContent=' Saved';
+  }catch(e){showToastV(e.message);}
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+function showToastV(msg){
+  const t=document.getElementById('toast-v');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('vpost-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('s-api-key').value=localStorage.getItem('sc_worker_url')||DEFAULT_WORKER;
+localStorage.removeItem('sc_api_key');
+async function initialiseLibrary(){
+  try {
+    const store=await storeReady;
+    const saved=await store.all();
+    const legacy=JSON.parse(localStorage.getItem('sc_videos')||'[]');
+    for(const job of legacy){if(!saved.some(v=>v.id===job.id)){job.status=job.status==='ready'?'package-ready':job.status;await store.put(job);}}
+    if(legacy.length)localStorage.removeItem('sc_videos');
+    const records=await store.all();
+    for(const record of records){
+      if(record.id.startsWith('reference:')){const id=record.id.slice(10);characterReferences[id]=record.reference;document.getElementById('ref-'+id).textContent=' Saved';}
+      else {if(record.status==='generating'){record.status='interrupted';record.error='The page closed during generation. Resume to continue from saved scenes.';await store.put(record);}vLibrary.push(record);}
+    }
+    vLibrary.sort((a,b)=>String(b.createdAt||b.id).localeCompare(String(a.createdAt||a.id)));renderDash();
+  } catch(e){showToastV('Could not load saved jobs: '+e.message);}
+}
+initialiseLibrary();renderDash();
+</script>
+</body>
+</html>
