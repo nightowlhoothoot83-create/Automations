@@ -1,6 +1,8 @@
 name: Automation 6 Operations Checks
 
 on:
+  pull_request:
+    branches: [codex/automation-6-infrastructure]
   workflow_dispatch:
   schedule:
     - cron: "17 3 * * 1"
@@ -21,6 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install locked dependencies
         run: npm ci --include=dev --ignore-scripts
       - name: Test infrastructure
@@ -36,6 +39,7 @@ jobs:
       - name: Validate deployed-versus-branch comparison without live capture
         run: node src/deployed-branch-compare-cli.mjs
       - name: Run read-only checks
+        if: github.event_name != 'pull_request'
         run: node src/cli.mjs --config config/targets.example.json
       - name: Upload structured evidence
         if: always()
@@ -45,3 +49,4 @@ jobs:
           path: artifacts/runs/
           if-no-files-found: warn
           retention-days: 30
+
